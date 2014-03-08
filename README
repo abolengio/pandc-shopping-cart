@@ -1,0 +1,93 @@
+
+
+Create a restful, json-based Web-Service for a very simple shopping cart. Basic functions are: adding
+an item, removing an item, listing all items in the cart. Also if the current time is within the
+rebate_timeframe of a product (see data below) make sure to give 20% discount on the price of the
+product. All users share the same cart, so there is no need for session management. Store the
+contents of the cart to a file in the filesystem, don't use a database. Given is a file with a list of
+products which can be added to the cart (see below).
+You may use any tools that you like to accomplish this task, including build/dependency
+management, IDE/editor, libraries, etc.
+We should be able to run your solution without needing to make any changes, with a single
+command, an available internet connection, an up-to-date Java SDK and the build tool of your choice,
+which we will install and setup.
+You should write suitable tests that confirm that the code you have written is working as it should.
+All source code to the solution should be provided as a buildable, testable project.
+
+products.csv:
+
+product_id,name,price,rebate_timeframe
+1001,Dress with pink flowers,29.99,2014-02-28:15:00:00-2014-02-28:16:00:00
+1002,Green Shirt,9.90,
+1003,Blue Trousers,14.50,
+1004,Brown Bag,5.00,
+
+
+Questions:
+Q1: Are these the only products or just example of products, do you expect to be able to add a random product,
+which is not in stock? I.e.is validation required
+Q2: Do I have to use any persistance at all? Is my ability to choose a data structure and write to a file is being tested or that requirement means
+just the simplest possible way to keep the state across restarts. Do you care about restarts though?
+Q3: is stock service also expected?
+
+Notes:
+"Given is a file with a list of products which can be added to the cart (see below)." does not read nice
+
+Assumptions:
+A1: rebate price is calculated based on the time of displaying the content of the shopping cart (later checkout/purchase time)
+not the time the product is added to the cart
+A2: no pagination is required for the content of the cart
+A3: product details do not change too often to create issues with inconsistency between stock and shopping cart content.
+Advantages of not having dependency between shopping-cart and stock assumed to be higher than disadvantages of potential inconsistency
+A4: availability of items in stock in not an issue i.e. where is unlimited number of items in stock all the time
+A5: api clients are interested in the content of the whole cart rather then details of items so that whole cart is returned
+for all operations
+A6: API is to be used inside the network i.e. not exposed to public. Clients have to know about existing products from other services
+like stock service and not interested in putting non existing products into the cart
+
+Operations
+
+list:
+    >
+
+    <   items
+            0..n item: productId, description, price, quantity, discount amount ?, discount until ?
+        total: amount EUR
+        valid till: rebate_timeframe_end
+
+add:
+    > POST productId, description, price, ? quantity, rebate_timeframe
+
+    <   items
+            0..n item: productId, description, price, quantity, discount amount ?, discount until ?
+        price:
+            total: amount EUR
+            valid till: rebate-timeframe-end
+
+    how does the cart learn about the product description ?
+    how does the cart know that the item actually exist? does it care?
+
+change quantity:
+
+    >  PUT (CHANGE) productId, ? quantity
+
+    <   items
+            0..n item: productId, description, price, quantity, discount amount ?, discount until ?
+        price:
+            total: amount EUR
+            valid till: rebate-timeframe-end
+
+    how does the cart learn about the updated price?
+
+remove completely:
+
+    >   DELETE productId
+
+    <   items
+            0..n item: productId, description, price, quantity, discount amount ?, discount until ?
+        price:
+            total: amount EUR
+            valid till: rebate-timeframe-end
+
+
+
