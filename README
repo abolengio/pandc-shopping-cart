@@ -28,12 +28,13 @@ Q1: Are these the only products or just example of products, do you expect to be
 which is not in stock? I.e.is validation required
 Q2: Do I have to use any persistance at all? Is my ability to choose a data structure and write to a file is being tested or that requirement means
 just the simplest possible way to keep the state across restarts. Do you care about restarts though?
-Q3: is stock service also expected?
+Q3: is stock/product catalogue service also expected?
 
 Notes:
 "Given is a file with a list of products which can be added to the cart (see below)." does not read nice
 
 Assumptions:
+A0: I do not have [instant] access to the requirements owner and should come up with some assumptions
 A1: rebate price is calculated based on the time of displaying the content of the shopping cart (later checkout/purchase time)
 not the time the product is added to the cart
 A2: no pagination is required for the content of the cart
