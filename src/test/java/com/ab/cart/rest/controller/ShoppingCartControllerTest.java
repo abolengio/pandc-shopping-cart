@@ -2,7 +2,7 @@ package com.ab.cart.rest.controller;
 
 import com.ab.cart.config.spring.TestApplicationConfig;
 import com.ab.cart.config.spring.WebMvcConfig;
-import com.ab.cart.domain.EffectivePricingProduct;
+import com.ab.cart.domain.EffectivePriceProduct;
 import com.ab.cart.domain.ReadableShoppingCartProvider;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -19,7 +19,7 @@ import org.springframework.web.context.WebApplicationContext;
 
 import java.nio.charset.Charset;
 
-import static com.ab.cart.domain.builders.EffectivePricingProductBuilder.productWithId;
+import static com.ab.cart.domain.builders.EffectivePriceProductBuilder.productWithId;
 import static com.ab.cart.domain.builders.ExpandedCartItemBuilder.cartItem;
 import static com.ab.cart.domain.builders.ReadableShoppingCartBuilder.shoppingCart;
 import static com.jayway.jsonassert.impl.matcher.IsCollectionWithSize.hasSize;
@@ -69,8 +69,8 @@ public class ShoppingCartControllerTest {
     public void shouldReturnCartWhenItIsNotEmpty() throws Exception{
 
      //   Product
-        EffectivePricingProduct product1 = productWithId("product1-id").name("product 1").price(12.38).build();
-        EffectivePricingProduct product2 = productWithId("product2-id").name("product 2 name").price(8.50)
+        EffectivePriceProduct product1 = productWithId("product1-id").name("product 1").price(12.38).build();
+        EffectivePriceProduct product2 = productWithId("product2-id").name("product 2 name").price(8.50)
                                     .rebateTimeframe().start("2014-04-01T12:37:00").end("2014-05-01T12:37:00").build();
         when(mockReadableShoppingCartProvider
                     .getReadableShoppingCart()).thenReturn(
@@ -95,8 +95,8 @@ public class ShoppingCartControllerTest {
     @Ignore
     public void shouldReturnCartWhenSomeItemsHaveRebateDiscount() throws Exception{
 
-        EffectivePricingProduct product1 = productWithId("product1-id").name("product 1").price(12.38).build();
-        EffectivePricingProduct product2 = productWithId("product2-id").name("product 2 name").price(8.50)
+        EffectivePriceProduct product1 = productWithId("product1-id").name("product 1").price(12.38).build();
+        EffectivePriceProduct product2 = productWithId("product2-id").name("product 2 name").price(8.50)
                                     .rebateTimeframe().start("2014-04-01T12:37:00").end("2014-05-01T12:37:00").build();
         when(mockReadableShoppingCartProvider
                     .getReadableShoppingCart()).thenReturn(

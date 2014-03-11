@@ -1,8 +1,8 @@
 package com.ab.cart.domain.converters;
 
 import com.ab.cart.domain.CartItem;
-import com.ab.cart.domain.EffectivePricingProduct;
-import com.ab.cart.domain.EffectivePricingProvider;
+import com.ab.cart.domain.EffectivePriceProduct;
+import com.ab.cart.domain.EffectivePriceProductProvider;
 import com.ab.cart.domain.ExpandedCartItem;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -18,17 +18,17 @@ import static org.mockito.Mockito.when;
 public class CartItemToExpandedCartItemTransformerTest {
 
     @Mock
-    EffectivePricingProvider effectivePricingProvider;
+    EffectivePriceProductProvider effectivePriceProductProvider;
 
     @Test
     public void shouldEnhanceItemWithProductFromCatalogue() {
-        EffectivePricingProduct effectivePricingProduct = mock(EffectivePricingProduct.class);
-        when(effectivePricingProvider.getProduct("product-id-1")).thenReturn(effectivePricingProduct);
-        when(effectivePricingProduct.getProductId()).thenReturn("product-id-1");
-        CartItemToExpandedCartItemTransformer transformer = new CartItemToExpandedCartItemTransformer(effectivePricingProvider);
+        EffectivePriceProduct effectivePriceProduct = mock(EffectivePriceProduct.class);
+        when(effectivePriceProductProvider.getProduct("product-id-1")).thenReturn(effectivePriceProduct);
+        when(effectivePriceProduct.getProductId()).thenReturn("product-id-1");
+        CartItemToExpandedCartItemTransformer transformer = new CartItemToExpandedCartItemTransformer(effectivePriceProductProvider);
         ExpandedCartItem expandedCartItem = transformer.apply(new CartItem("product-id-1", 3));
         assertThat(expandedCartItem.getProductId(), is("product-id-1"));
         assertThat(expandedCartItem.getQuantity(), is(3));
-        assertThat(expandedCartItem.getProduct(), is(effectivePricingProduct));
+        assertThat(expandedCartItem.getProduct(), is(effectivePriceProduct));
     }
 }

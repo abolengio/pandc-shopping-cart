@@ -15,7 +15,7 @@ import static org.mockito.Mockito.when;
 public class ExpandedCartItemTest {
 
     @Mock
-    EffectivePricingProduct product;
+    EffectivePriceProduct product;
 
     @Test
     public void shouldCalculateSubTotalForOneItem() {

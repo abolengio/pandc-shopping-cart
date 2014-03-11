@@ -4,14 +4,14 @@ import org.joda.money.Money;
 
 public class ExpandedCartItem extends CartItem {
 
-    private final EffectivePricingProduct product;
+    private final EffectivePriceProduct product;
 
-    public ExpandedCartItem(EffectivePricingProduct product, int quantity) {
+    public ExpandedCartItem(EffectivePriceProduct product, int quantity) {
         super(product.getProductId(), quantity);
         this.product = product;
     }
 
-    public EffectivePricingProduct getProduct() {
+    public EffectivePriceProduct getProduct() {
         return product;
     }
 
