@@ -2,8 +2,8 @@ package com.ab.cart.rest.controller;
 
 import com.ab.cart.config.spring.TestApplicationConfig;
 import com.ab.cart.config.spring.WebMvcConfig;
-import com.ab.cart.domain.Product;
-import com.ab.cart.repository.ReadableShoppingCartRepository;
+import com.ab.cart.domain.EffectivePricingProduct;
+import com.ab.cart.domain.ReadableShoppingCartProvider;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -19,9 +19,9 @@ import org.springframework.web.context.WebApplicationContext;
 
 import java.nio.charset.Charset;
 
+import static com.ab.cart.domain.builders.EffectivePricingProductBuilder.productWithId;
 import static com.ab.cart.domain.builders.ExpandedCartItemBuilder.cartItem;
-import static com.ab.cart.domain.builders.ProductBuilder.productWithId;
-import static com.ab.cart.domain.builders.ShoppingCartBuilder.shoppingCart;
+import static com.ab.cart.domain.builders.ReadableShoppingCartBuilder.shoppingCart;
 import static com.jayway.jsonassert.impl.matcher.IsCollectionWithSize.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.reset;
@@ -44,18 +44,18 @@ public class ShoppingCartControllerTest {
     private WebApplicationContext webApplicationContext;
 
     @Autowired
-    private ReadableShoppingCartRepository mockReadableShoppingCartRepository;
+    private ReadableShoppingCartProvider mockReadableShoppingCartProvider;
 
     @Before
     public void setup() {
         mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
-        reset(mockReadableShoppingCartRepository);
+        reset(mockReadableShoppingCartProvider);
     }
 
     @Test
     public void shouldReturnNoItemsWhenCartIsEmpty() throws Exception{
 
-        when(mockReadableShoppingCartRepository.getReadableShoppingCart())
+        when(mockReadableShoppingCartProvider.getReadableShoppingCart())
                 .thenReturn(shoppingCart().empty().build());
 
         mockMvc.perform(get(UriFor.cart))
@@ -69,10 +69,10 @@ public class ShoppingCartControllerTest {
     public void shouldReturnCartWhenItIsNotEmpty() throws Exception{
 
      //   Product
-        Product product1 = productWithId("product1-id").name("product 1").price(12.38).build();
-        Product product2 = productWithId("product2-id").name("product 2 name").price(8.50)
+        EffectivePricingProduct product1 = productWithId("product1-id").name("product 1").price(12.38).build();
+        EffectivePricingProduct product2 = productWithId("product2-id").name("product 2 name").price(8.50)
                                     .rebateTimeframe().start("2014-04-01T12:37:00").end("2014-05-01T12:37:00").build();
-        when(mockReadableShoppingCartRepository
+        when(mockReadableShoppingCartProvider
                     .getReadableShoppingCart()).thenReturn(
                                                     shoppingCart().withItems(
                                                             cartItem().with(product1).quantity(1).build()
@@ -95,11 +95,10 @@ public class ShoppingCartControllerTest {
     @Ignore
     public void shouldReturnCartWhenSomeItemsHaveRebateDiscount() throws Exception{
 
-     //   Product
-        Product product1 = productWithId("product1-id").name("product 1").price(12.38).build();
-        Product product2 = productWithId("product2-id").name("product 2 name").price(8.50)
+        EffectivePricingProduct product1 = productWithId("product1-id").name("product 1").price(12.38).build();
+        EffectivePricingProduct product2 = productWithId("product2-id").name("product 2 name").price(8.50)
                                     .rebateTimeframe().start("2014-04-01T12:37:00").end("2014-05-01T12:37:00").build();
-        when(mockReadableShoppingCartRepository
+        when(mockReadableShoppingCartProvider
                     .getReadableShoppingCart()).thenReturn(
                                                     shoppingCart().withItems(
                                                             cartItem().with(product1).quantity(1).build()

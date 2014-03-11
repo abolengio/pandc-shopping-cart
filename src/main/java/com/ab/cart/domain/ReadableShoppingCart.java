@@ -2,9 +2,9 @@ package com.ab.cart.domain;
 
 import org.joda.money.Money;
 
-import java.util.Collection;
+import java.util.List;
 
 public interface ReadableShoppingCart {
-    Collection<ExpandedCartItem> getItems();
+    List<ExpandedCartItem> getItems();
     Money getSubTotal();
 }

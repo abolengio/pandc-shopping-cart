@@ -1,18 +1,18 @@
 package com.ab.cart.domain.builders;
 
+import com.ab.cart.domain.EffectivePricingProduct;
 import com.ab.cart.domain.ExpandedCartItem;
-import com.ab.cart.domain.Product;
 
 public class ExpandedCartItemBuilder {
 
-    private Product product = null;
+    private EffectivePricingProduct product = null;
     private int quantity = 1;
 
     public static ExpandedCartItemBuilder cartItem() {
         return new ExpandedCartItemBuilder();
     }
 
-    public ExpandedCartItemBuilder with(Product product) {
+    public ExpandedCartItemBuilder with(EffectivePricingProduct product) {
         this.product = product;
         return this;
     }

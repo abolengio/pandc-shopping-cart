@@ -1,15 +1,21 @@
 package com.ab.cart.domain;
 
+import org.joda.money.Money;
+
 public class ExpandedCartItem extends CartItem {
 
-    private final Product product;
+    private final EffectivePricingProduct product;
 
-    public ExpandedCartItem(Product product, int quantity) {
+    public ExpandedCartItem(EffectivePricingProduct product, int quantity) {
         super(product.getProductId(), quantity);
         this.product = product;
     }
 
-    public Product getProduct() {
+    public EffectivePricingProduct getProduct() {
         return product;
+    }
+
+    public Money getSubTotal() {
+        return product.getEffectivePrice().multipliedBy(getQuantity());
     }
 }

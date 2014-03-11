@@ -1,13 +1,13 @@
 package com.ab.cart.domain.builders;
 
-import com.ab.cart.domain.Product;
+import com.ab.cart.domain.EffectivePricingProduct;
 import org.joda.money.CurrencyUnit;
 import org.joda.money.Money;
 import org.joda.time.Interval;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
-public class ProductBuilder {
+public class EffectivePricingProductBuilder {
 
     private static DateTimeFormatter formatter = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss");
 
@@ -17,15 +17,15 @@ public class ProductBuilder {
     String rebateTimeFrameStart = null;
     String rebateTimeFrameEnd = null;
 
-    public static ProductBuilder productWithId(String productId) {
-        return new ProductBuilder(productId);
+    public static EffectivePricingProductBuilder productWithId(String productId) {
+        return new EffectivePricingProductBuilder(productId);
     }
 
-    public ProductBuilder(String productId) {
+    public EffectivePricingProductBuilder(String productId) {
         this.productId = productId;
     }
 
-    public Product build() {
+    public EffectivePricingProduct build() {
         Interval rebateTimeFrame;
         if(rebateTimeFrameStart == null && rebateTimeFrameEnd == null) {
             rebateTimeFrame = null;
@@ -33,16 +33,16 @@ public class ProductBuilder {
             rebateTimeFrame = new Interval(formatter.parseDateTime(rebateTimeFrameStart), formatter.parseDateTime(rebateTimeFrameEnd));
 
         } else throw new IllegalArgumentException("Both start and end of rebate timeframe should be specified");
-        return new Product(productId, name, price, rebateTimeFrame);
+        return new EffectivePricingProduct(productId, name, price, rebateTimeFrame);
 
     }
 
-    public ProductBuilder name(String name) {
+    public EffectivePricingProductBuilder name(String name) {
         this.name = name;
         return this;
     }
 
-    public ProductBuilder price(Double price) {
+    public EffectivePricingProductBuilder price(Double price) {
         this.price = Money.of(CurrencyUnit.EUR, price);
         return this;
     }
@@ -53,9 +53,9 @@ public class ProductBuilder {
 
     public class RebateTimeFrameBuilder {
 
-        private ProductBuilder productBuilder;
+        private EffectivePricingProductBuilder productBuilder;
 
-        public RebateTimeFrameBuilder(ProductBuilder productBuilder) {
+        public RebateTimeFrameBuilder(EffectivePricingProductBuilder productBuilder) {
             this.productBuilder = productBuilder;
         }
 
@@ -64,7 +64,7 @@ public class ProductBuilder {
             return this;
         }
 
-        public ProductBuilder end(String end) {
+        public EffectivePricingProductBuilder end(String end) {
             rebateTimeFrameEnd = end;
             return productBuilder;
         }

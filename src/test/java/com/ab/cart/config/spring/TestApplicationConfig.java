@@ -1,6 +1,6 @@
 package com.ab.cart.config.spring;
 
-import com.ab.cart.repository.ReadableShoppingCartRepository;
+import com.ab.cart.domain.ReadableShoppingCartProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -14,10 +14,8 @@ import static org.mockito.Mockito.mock;
 public class TestApplicationConfig {
 
     @Bean
-    ReadableShoppingCartRepository shoppingCartRepository() {
-        return mock(ReadableShoppingCartRepository.class);
+    ReadableShoppingCartProvider readableShoppingCartProvider() {
+        return mock(ReadableShoppingCartProvider.class);
     }
-
-
 
 }
