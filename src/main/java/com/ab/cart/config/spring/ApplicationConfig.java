@@ -2,9 +2,9 @@ package com.ab.cart.config.spring;
 
 import com.ab.cart.domain.Product;
 import com.ab.cart.domain.productcatalogue.ProductCatalogue;
-import com.ab.cart.repository.ShoppingCartRepository;
+import com.ab.cart.repository.ReadableShoppingCartRepository;
 import com.ab.cart.repository.impl.CsvFileProductProvider;
-import com.ab.cart.repository.impl.FileShoppingCartRepository;
+import com.ab.cart.repository.impl.FileReadableShoppingCartRepository;
 import com.ab.cart.repository.impl.ProductCsvEntryParser;
 import com.ab.cart.repository.impl.ProductRebateTimeFrameParser;
 import com.ab.cart.repository.impl.StaticProductRepository;
@@ -21,8 +21,8 @@ import java.util.List;
 public class ApplicationConfig {
 
     @Bean
-    ShoppingCartRepository shoppingCartRepository() {
-        return new FileShoppingCartRepository();
+    ReadableShoppingCartRepository shoppingCartRepository() {
+        return new FileReadableShoppingCartRepository();
     }
 
     @Bean

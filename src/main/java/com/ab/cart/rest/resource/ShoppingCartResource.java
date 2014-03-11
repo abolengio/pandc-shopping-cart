@@ -1,25 +1,26 @@
 package com.ab.cart.rest.resource;
 
-import com.ab.cart.domain.CartItem;
+import com.ab.cart.domain.ExpandedCartItem;
+import com.ab.cart.domain.ReadableShoppingCart;
+import org.springframework.hateoas.ResourceSupport;
 
 import java.math.BigDecimal;
-import java.util.List;
+import java.util.Collection;
 
-public class ShoppingCartResource {
+public class ShoppingCartResource extends ResourceSupport {
 
-    private List<CartItem> items;
-    private BigDecimal total = new BigDecimal("0");
+    private ReadableShoppingCart readableShoppingCart;
 
-    public ShoppingCartResource(List<CartItem> items) {
-        this.items = items;
+    public ShoppingCartResource(ReadableShoppingCart readableShoppingCart) {
+        this.readableShoppingCart = readableShoppingCart;
     }
 
-    public List<CartItem> getItems() {
-        return items;
+    public Collection<ExpandedCartItem> getItems() {
+        return readableShoppingCart.getItems();
     }
 
-    public BigDecimal getTotal() {
-        return total;
+    public BigDecimal getSubTotal() {
+        return readableShoppingCart.getSubTotal().getAmount();
     }
 
 

@@ -40,6 +40,7 @@ A1: rebate price is calculated based on the time of displaying the content of th
 not the time the product is added to the cart
 A1.1: sub total for the whole cart is useful
 A1.2: all prices are in Euro, no conversion is ever required
+A1.3: it is going to be hosted on machines working in CET time (same time zone as users are)
 A2: no pagination is required for the content of the cart
 A3: product details do not change too often to create issues with inconsistency between stock and shopping cart content.
 Advantages of not having dependency between shopping-cart and stock assumed to be higher than disadvantages of potential inconsistency
@@ -94,4 +95,5 @@ remove completely:
             valid till: rebate-timeframe-end
 
 
-
+TODO:
+- handle when quantity is updated to 0
