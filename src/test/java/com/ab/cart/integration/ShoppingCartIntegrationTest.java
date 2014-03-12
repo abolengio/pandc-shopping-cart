@@ -1,6 +1,7 @@
 package com.ab.cart.integration;
 
-import com.ab.cart.config.spring.IntegrationTestConfig;
+import com.ab.cart.config.spring.ApplicationConfig;
+import com.ab.cart.config.spring.IntegrationTestPropertiesConfig;
 import com.ab.cart.config.spring.WebMvcConfig;
 import com.ab.cart.rest.controller.UriFor;
 import org.junit.Before;
@@ -25,7 +26,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = {WebMvcConfig.class,IntegrationTestConfig.class})
+@ContextConfiguration(classes = {WebMvcConfig.class, ApplicationConfig.class, IntegrationTestPropertiesConfig.class})
 @WebAppConfiguration
 public class ShoppingCartIntegrationTest {
 
