@@ -25,12 +25,16 @@ class AggregatingShoppingCart implements WritableShoppingCart {
 
     @Override
     public void remove(String productId) {
-        //To change body of implemented methods use File | Settings | File Templates.
+        items.remove(productId);
     }
 
     @Override
     public void updateQuantity(String productId, int quantity) {
-        //To change body of implemented methods use File | Settings | File Templates.
+        if(quantity < 1) {
+            remove(productId);
+        } else {
+            items.put(productId, new CartItem(productId, quantity));
+        }
     }
 
     public List<CartItem> getItems() {

@@ -10,10 +10,10 @@ import java.util.LinkedHashMap;
 
 import static com.google.common.collect.Iterables.transform;
 
-//todo shopping cart doing too much
+//todo remove or repurpose
 public class ShoppingCart {
 
-    private LinkedHashMap<String, CartItem> items; //todo thread safety ?
+    private LinkedHashMap<String, CartItem> items;
     private ProductCatalogue productCatalogue;
 
     public ShoppingCart(ProductCatalogue productCatalogue) {
@@ -28,7 +28,7 @@ public class ShoppingCart {
         if(items.containsKey(productId)) {
             items.put(productId, new CartItem(productId, quantity + items.get(productId).getQuantity()));
         } else
-            items.put(productId, new CartItem(productId, quantity));    //todo redundancy ?
+            items.put(productId, new CartItem(productId, quantity));
     }
 
     public CartItem getItem(String productId) {
