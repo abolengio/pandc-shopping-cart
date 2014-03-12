@@ -97,3 +97,14 @@ remove completely:
 
 TODO:
 - handle when quantity is updated to 0
+- handle adding non-existing product
+
+- ShoppingCartItemsRepository
+- Aggregating Shopping Cart
+- EffectivePricingProvider
+- ReadableShoppingCartProvider
+- ReadableShoppingCartImpl ?
+
+WHAT I WOULD DO DIFFERENTLY:
+- either define one MasterTransformer class which passes data between a sequence of transformations
+- or use Json as data
