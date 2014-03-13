@@ -1,6 +1,7 @@
 package com.ab.cart.config.spring;
 
 import com.ab.cart.domain.ReadableShoppingCartProvider;
+import com.ab.cart.domain.WritableShoppingCart;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -16,6 +17,11 @@ public class TestApplicationConfig {
     @Bean
     ReadableShoppingCartProvider readableShoppingCartProvider() {
         return mock(ReadableShoppingCartProvider.class);
+    }
+
+    @Bean
+    WritableShoppingCart writableShoppingCart() {
+        return mock(WritableShoppingCart.class);
     }
 
 }
