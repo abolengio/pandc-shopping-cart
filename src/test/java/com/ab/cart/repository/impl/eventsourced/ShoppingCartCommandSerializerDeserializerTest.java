@@ -6,7 +6,8 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import static org.junit.Assert.fail;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.verify;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -42,15 +43,17 @@ public class ShoppingCartCommandSerializerDeserializerTest {
 
     @Test
     public void shouldWriteRemoveCommand() {
-        fail();
+        assertThat(commandEncoderDecoder.removeCommandFor("blah-id"), is("REMOVE,blah-id"));
     }
+
     @Test
     public void shouldWriteAddCommand() {
-        fail();
+        assertThat(commandEncoderDecoder.addCommandFor("blah-id", 89), is("ADD,blah-id,89"));
     }
+
     @Test
     public void shouldWriteUpdateCommand() {
-        fail();
+        assertThat(commandEncoderDecoder.updateQuantityCommandFor("blah-id", 89), is("UPDATE_QUANTITY,blah-id,89"));
     }
 
 }

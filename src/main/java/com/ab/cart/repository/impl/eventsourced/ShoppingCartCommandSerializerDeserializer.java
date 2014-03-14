@@ -31,14 +31,14 @@ public class ShoppingCartCommandSerializerDeserializer {
     }
 
     public String addCommandFor(String productId, int quantity) {
-        return format("ADD,%s,%s",productId,quantity);
+        return format("%s,%s,%s",ADD_COMMAND,productId,quantity);
     }
 
     public String removeCommandFor(String productId) {
-        return null;  //To change body of created methods use File | Settings | File Templates.
+        return format("%s,%s",REMOVE_COMMAND,productId);
     }
 
     public String updateQuantityCommandFor(String productId, int quantity) {
-        return null;  //To change body of created methods use File | Settings | File Templates.
+        return format("%s,%s,%s",UPDATE_COMMAND,productId,quantity);
     }
 }
