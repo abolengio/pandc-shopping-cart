@@ -7,6 +7,7 @@ import com.ab.cart.rest.resource.ShoppingCartResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -34,15 +35,37 @@ public class ShoppingCartController {
 
     @ExceptionHandler(Exception.class)
     public void handleException(Exception ex) {
-        ex.printStackTrace();
+        ex.printStackTrace();   //todo
     }
 
     @RequestMapping(value = UriFor.cartItems, method = RequestMethod.POST)
     @ResponseBody
     public ShoppingCartResource addItem(@RequestBody CartItemParameter cartItem) {
-        System.out.println("HURRAY - " + writableShoppingCart.getClass().getName());
-        System.out.println("CartItemParameter - " + cartItem.getProductId());
         writableShoppingCart.add(cartItem.getProductId(), cartItem.getQuantity());
+
+        //todo what is the response code
+        ReadableShoppingCart readableShoppingCart = readableShoppingCartProvider.getReadableShoppingCart();
+        return new ShoppingCartResource(readableShoppingCart); //todo refactor to avoid duplication
+    }
+
+
+    @RequestMapping(value = UriFor.cartItem, method = RequestMethod.DELETE)
+    @ResponseBody
+    public ShoppingCartResource removeItem(@PathVariable String productId) {
+        writableShoppingCart.remove(productId);
+
+        //todo what is the response code ?
+        ReadableShoppingCart readableShoppingCart = readableShoppingCartProvider.getReadableShoppingCart();
+        return new ShoppingCartResource(readableShoppingCart); //todo refactor to avoid duplication
+    }
+
+    @RequestMapping(value = UriFor.cartItem, method = RequestMethod.PUT)
+    @ResponseBody
+    public ShoppingCartResource updateQuantity(@PathVariable String productId, @RequestBody CartItemParameter cartItem) {
+        //todo validate that parameters match
+        writableShoppingCart.updateQuantity(cartItem.getProductId(), cartItem.getQuantity());
+
+        //todo what is the response code ?
         ReadableShoppingCart readableShoppingCart = readableShoppingCartProvider.getReadableShoppingCart();
         return new ShoppingCartResource(readableShoppingCart); //todo refactor to avoid duplication
     }

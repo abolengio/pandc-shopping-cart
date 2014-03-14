@@ -25,10 +25,13 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 
 import static com.jayway.jsonassert.impl.matcher.IsCollectionWithSize.hasSize;
+import static org.apache.commons.lang.StringUtils.replace;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -95,10 +98,9 @@ public class ShoppingCartIntegrationTest {
     }
 
     @Test
-    public void shouldAddItemContent() throws Exception{
+    public void shouldAddItem() throws Exception{
         givenProductFileWithContent("1001,test dress with pink flowers,29.99,2014-02-28:15:00:00-2014-02-28:16:00:00\n" +
-                                    "1002,Test Green Shirt,9.90,\n" +
-                                    "some-other-id, line without comma at the end, 23");
+                                    "1002,Test Green Shirt,9.90,\n" );
 
         givenShoppingCartFileWithContent("ADD,1001,1\n");
 
@@ -109,9 +111,51 @@ public class ShoppingCartIntegrationTest {
                 .andExpect(status().isOk())
                 ;
 
-        assertThat(shoppingCartFileContent(), is(   "ADD,1001,1\n" +
-                                                    "ADD,1002,2\n"));
+        assertThat(shoppingCartFileContent(), is("ADD,1001,1\n" +
+                "ADD,1002,2\n"));
     }
 
+    @Test
+    public void shouldRemoveItem() throws Exception{
+        givenProductFileWithContent("1001,test dress with pink flowers,29.99,2014-02-28:15:00:00-2014-02-28:16:00:00\n" +
+                                    "1002,Test Green Shirt,9.90,\n");
+
+        givenShoppingCartFileWithContent("ADD,1001,1\n" +
+                "ADD,1002,2\n");
+
+        mockMvc.perform(delete(uriForCartItemWithProductId("1001"))
+                )
+                .andExpect(status().isOk())
+        ;
+
+        assertThat(shoppingCartFileContent(), is(   "ADD,1001,1\n" +
+                                                    "ADD,1002,2\n" +
+                                                    "REMOVE,1001\n"));
+    }
+
+    @Test
+    public void shouldUpdateQuantityInItem() throws Exception{
+        givenProductFileWithContent("1001,test dress with pink flowers,29.99,2014-02-28:15:00:00-2014-02-28:16:00:00\n" +
+                                    "1002,Test Green Shirt,9.90,\n");
+
+        givenShoppingCartFileWithContent("ADD,1001,1\n");
+
+        mockMvc.perform(put(uriForCartItemWithProductId("1002"))
+                                        .contentType(APPLICATION_JSON_UTF8)
+                                        .content("{" +
+                                                    "\"productId\":\"1002\"," +
+                                                    "\"quantity\":2" +
+                                                 "}"))
+                                        .andExpect(status().isOk())
+        ;
+
+        assertThat(shoppingCartFileContent(), is(   "ADD,1001,1\n" +
+                                                    "UPDATE_QUANTITY,1002,2\n"));
+    }
+
+    private String uriForCartItemWithProductId(String productId) {
+        return replace(UriFor.cartItem, "{productId}" , productId);
+    }
     //todo check with clock set
+    //todo deleting or updating item for product which is not in the cart
 }
