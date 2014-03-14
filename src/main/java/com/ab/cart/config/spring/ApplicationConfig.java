@@ -14,7 +14,9 @@ import com.ab.cart.repository.impl.eventsourced.AggregatingShoppingCartFactory;
 import com.ab.cart.repository.impl.eventsourced.EventSourcingFileShoppingCartReaderWriter;
 import com.ab.cart.repository.impl.eventsourced.EventSourcingShoppingCartItemsRepository;
 import com.ab.cart.repository.impl.eventsourced.ShoppingCartCommandSerializerDeserializer;
+import com.ab.cart.utils.FileLineWriter;
 import com.ab.cart.utils.FileReaderProvider;
+import com.ab.cart.utils.FileWriterProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -26,6 +28,9 @@ import java.util.List;
 @Configuration
 public class ApplicationConfig {
 
+    @Autowired
+    Environment environment;
+
     @Bean
     @Autowired
     public ReadableShoppingCartProvider readableShoppingCartProvider(ShoppingCartItemsRepository shoppingCartItemsRepository,
@@ -35,11 +40,18 @@ public class ApplicationConfig {
 
     @Bean
     @Autowired
-    public ShoppingCartItemsRepository shoppingCartItemsRepository(Environment environment) {
+    public ShoppingCartItemsRepository shoppingCartItemsRepository() {
         return new EventSourcingShoppingCartItemsRepository(new AggregatingShoppingCartFactory()
-                , new EventSourcingFileShoppingCartReaderWriter(environment,
-                                                                fileReaderProvider(),
-                                                                new ShoppingCartCommandSerializerDeserializer()));
+                , eventSourcingFileShoppingCartReaderWriter());
+    }
+
+    @Bean
+    @Autowired
+    public EventSourcingFileShoppingCartReaderWriter eventSourcingFileShoppingCartReaderWriter() {
+        return new EventSourcingFileShoppingCartReaderWriter(environment,
+                                                        fileReaderProvider(),
+                                                        new FileLineWriter(fileWriterProvider(), environment.getProperty(EventSourcingFileShoppingCartReaderWriter.SHOPPING_CART_FILE_PATH_PROPERTY)),
+                                                        new ShoppingCartCommandSerializerDeserializer());
     }
 
     @Bean
@@ -52,6 +64,11 @@ public class ApplicationConfig {
     @Autowired
     public EffectivePriceProductProvider effectivePriceProductProvider(ProductCatalogue productCatalogue) {
         return new EffectivePriceProductProvider(productCatalogue);
+    }
+
+    @Bean
+    public FileWriterProvider fileWriterProvider() {
+        return new FileWriterProvider();
     }
 
     @Bean

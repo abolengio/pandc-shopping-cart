@@ -8,6 +8,7 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.mock.env.MockEnvironment;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.List;
@@ -30,7 +31,7 @@ public class CsvFileProductProviderTest {
     public void shouldParseOneLinerFile() throws IOException {
         MockEnvironment environment = new MockEnvironment()
                                         .withProperty(CsvFileProductProvider.PRODUCT_CSV_FILE_PATH_PROPERTY, "blah-file");
-        when(fileReaderProvider.getFileReader("blah-file")).thenReturn(new StringReader("one liner"));
+        when(fileReaderProvider.getFileReader("blah-file")).thenReturn(getReaderWith("one liner"));
         Product product1 = mock(Product.class);
         when(productCsvEntryParser.parseEntry("one liner")).thenReturn(product1);
         CsvFileProductProvider provider = new CsvFileProductProvider(environment
@@ -45,7 +46,7 @@ public class CsvFileProductProviderTest {
     public void shouldParseEmptyFile() throws IOException {
         MockEnvironment environment = new MockEnvironment()
                                         .withProperty(CsvFileProductProvider.PRODUCT_CSV_FILE_PATH_PROPERTY, "blah-file");
-        when(fileReaderProvider.getFileReader("blah-file")).thenReturn(new StringReader(""));
+        when(fileReaderProvider.getFileReader("blah-file")).thenReturn(getReaderWith(""));
         CsvFileProductProvider provider = new CsvFileProductProvider(environment
                                                                     , fileReaderProvider
                                                                     , productCsvEntryParser);
@@ -57,7 +58,7 @@ public class CsvFileProductProviderTest {
     public void shouldParseFileContainingSeveralLines() throws IOException {
         MockEnvironment environment = new MockEnvironment()
                                         .withProperty(CsvFileProductProvider.PRODUCT_CSV_FILE_PATH_PROPERTY, "blah-file");
-        when(fileReaderProvider.getFileReader("blah-file")).thenReturn(new StringReader("first line\nsecond line"));
+        when(fileReaderProvider.getFileReader("blah-file")).thenReturn(getReaderWith("first line\nsecond line"));
         Product product1 = mock(Product.class);
         when(productCsvEntryParser.parseEntry("first line")).thenReturn(product1);
         Product product2 = mock(Product.class);
@@ -75,7 +76,8 @@ public class CsvFileProductProviderTest {
     public void shouldParseFileContainingEmptyLines() throws IOException {
         MockEnvironment environment = new MockEnvironment()
                                         .withProperty(CsvFileProductProvider.PRODUCT_CSV_FILE_PATH_PROPERTY, "blah-file");
-        when(fileReaderProvider.getFileReader("blah-file")).thenReturn(new StringReader("first line\n\nsecond line\n\n  "));
+        String content = "first line\n\nsecond line\n\n  ";
+        when(fileReaderProvider.getFileReader("blah-file")).thenReturn(getReaderWith(content));
         Product product1 = mock(Product.class);
         when(productCsvEntryParser.parseEntry("first line")).thenReturn(product1);
         Product product2 = mock(Product.class);
@@ -87,5 +89,9 @@ public class CsvFileProductProviderTest {
         assertThat(products, hasSize(2));
         assertThat(products.get(0), is(product1));
         assertThat(products.get(1), is(product2));
+    }
+
+    private BufferedReader getReaderWith(String content) {
+        return new BufferedReader(new StringReader(content));
     }
 }

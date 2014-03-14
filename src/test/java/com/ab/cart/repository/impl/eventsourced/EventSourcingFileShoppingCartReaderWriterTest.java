@@ -1,6 +1,7 @@
 package com.ab.cart.repository.impl.eventsourced;
 
 import com.ab.cart.domain.WritableShoppingCart;
+import com.ab.cart.utils.FileLineWriter;
 import com.ab.cart.utils.FileReaderProvider;
 import org.junit.Before;
 import org.junit.Test;
@@ -35,6 +36,8 @@ public class EventSourcingFileShoppingCartReaderWriterTest {
     WritableShoppingCart writableShoppingCart;
     @Mock
     ShoppingCartCommandSerializerDeserializer commandSerializerDeserializer;
+    @Mock
+    FileLineWriter fileLineWriter;
 
 
     MockEnvironment environment;
@@ -55,7 +58,7 @@ public class EventSourcingFileShoppingCartReaderWriterTest {
                 .withProperty(EventSourcingFileShoppingCartReaderWriter.SHOPPING_CART_FILE_PATH_PROPERTY, "specified file path");
         String content = "ADD,product-id-1,1";
         when(fileReaderProvider.getFileReader(anyString())).thenReturn(new StringReader(content));
-        EventSourcingFileShoppingCartReaderWriter reader = new EventSourcingFileShoppingCartReaderWriter(environment, fileReaderProvider,commandSerializerDeserializer);
+        EventSourcingFileShoppingCartReaderWriter reader = new EventSourcingFileShoppingCartReaderWriter(environment, fileReaderProvider,fileLineWriter,commandSerializerDeserializer);
         reader.readInto(writableShoppingCart);
         verify(fileReaderProvider).getFileReader("specified file path");
 
@@ -65,7 +68,7 @@ public class EventSourcingFileShoppingCartReaderWriterTest {
     public void shouldCloseReaderAfterReading() throws IOException {
         StringReader stringReader = new StringReader("dont really care");
         when(fileReaderProvider.getFileReader(anyString())).thenReturn(stringReader);
-        EventSourcingFileShoppingCartReaderWriter reader = new EventSourcingFileShoppingCartReaderWriter(environment, fileReaderProvider,commandSerializerDeserializer);
+        EventSourcingFileShoppingCartReaderWriter reader = new EventSourcingFileShoppingCartReaderWriter(environment, fileReaderProvider,fileLineWriter,commandSerializerDeserializer);
         verify(fileReaderProvider, never()).getFileReader(anyString());
         reader.readInto(writableShoppingCart);
         assertThat(readerIsClosed(stringReader), is(true));
@@ -76,7 +79,7 @@ public class EventSourcingFileShoppingCartReaderWriterTest {
         StringReader stringReader = new StringReader("don't really care");
         when(fileReaderProvider.getFileReader(anyString())).thenReturn(stringReader);
         doThrow(new RuntimeException()).when(commandSerializerDeserializer).read("don't really care", writableShoppingCart);
-        EventSourcingFileShoppingCartReaderWriter reader = new EventSourcingFileShoppingCartReaderWriter(environment, fileReaderProvider,commandSerializerDeserializer);
+        EventSourcingFileShoppingCartReaderWriter reader = new EventSourcingFileShoppingCartReaderWriter(environment, fileReaderProvider,fileLineWriter,commandSerializerDeserializer);
         try {
             reader.readInto(writableShoppingCart);
             fail("Exception expected");
@@ -95,23 +98,20 @@ public class EventSourcingFileShoppingCartReaderWriterTest {
         return false;
     }
 
-    //todo test file closing after each writing,
-    //todo test file closing after error ?
-
     @Test
     public void shouldReadFileWithOneLine() throws IOException {
         givenShoppingCartFileWithContent("one line content");
-        EventSourcingFileShoppingCartReaderWriter reader = new EventSourcingFileShoppingCartReaderWriter(environment, fileReaderProvider,commandSerializerDeserializer);
+        EventSourcingFileShoppingCartReaderWriter reader = new EventSourcingFileShoppingCartReaderWriter(environment, fileReaderProvider,fileLineWriter,commandSerializerDeserializer);
         reader.readInto(writableShoppingCart);
         verify(commandSerializerDeserializer).read("one line content",writableShoppingCart);
     }
 
-    //todo test the order ?
+    //todo test the order ? - actually dont and remove the order from other places, but add time when command was recorded
 
     @Test
     public void shouldReadFileWithMultipleLines() throws IOException {
         givenShoppingCartFileWithContent("first line content\nsecond line content\nthird line content");
-        EventSourcingFileShoppingCartReaderWriter reader = new EventSourcingFileShoppingCartReaderWriter(environment, fileReaderProvider,commandSerializerDeserializer);
+        EventSourcingFileShoppingCartReaderWriter reader = new EventSourcingFileShoppingCartReaderWriter(environment, fileReaderProvider,fileLineWriter,commandSerializerDeserializer);
         reader.readInto(writableShoppingCart);
         verify(commandSerializerDeserializer).read("first line content",writableShoppingCart);
         verify(commandSerializerDeserializer).read("second line content",writableShoppingCart);
@@ -121,7 +121,7 @@ public class EventSourcingFileShoppingCartReaderWriterTest {
     @Test
     public void shouldNotTouchShoppingCartIfFileIsEmpty() throws IOException {
         givenShoppingCartFileWithContent("");
-        EventSourcingFileShoppingCartReaderWriter reader = new EventSourcingFileShoppingCartReaderWriter(environment, fileReaderProvider,commandSerializerDeserializer);
+        EventSourcingFileShoppingCartReaderWriter reader = new EventSourcingFileShoppingCartReaderWriter(environment, fileReaderProvider,fileLineWriter,commandSerializerDeserializer);
         reader.readInto(writableShoppingCart);
         verifyZeroInteractions(commandSerializerDeserializer);
     }
@@ -129,9 +129,34 @@ public class EventSourcingFileShoppingCartReaderWriterTest {
     @Test
     public void shouldNotTouchShoppingCartIfFileDoesNotExist() throws IOException {
         when(fileReaderProvider.getFileReader(anyString())).thenThrow(new FileNotFoundException());
-        EventSourcingFileShoppingCartReaderWriter reader = new EventSourcingFileShoppingCartReaderWriter(environment, fileReaderProvider,commandSerializerDeserializer);
+        EventSourcingFileShoppingCartReaderWriter reader = new EventSourcingFileShoppingCartReaderWriter(environment, fileReaderProvider,fileLineWriter,commandSerializerDeserializer);
         reader.readInto(writableShoppingCart);
         verifyZeroInteractions(commandSerializerDeserializer);
+    }
+
+    @Test
+    public void shouldWriteAddCommand() {
+        when(commandSerializerDeserializer.addCommandFor("some-id",78)).thenReturn("serialized command");
+        EventSourcingFileShoppingCartReaderWriter writer = new EventSourcingFileShoppingCartReaderWriter(environment, fileReaderProvider,fileLineWriter,commandSerializerDeserializer);
+        writer.add("some-id", 78);
+        verify(fileLineWriter).addLine("serialized command");
+
+    }
+
+    @Test
+    public void shouldWriteRemoveCommand() {
+        when(commandSerializerDeserializer.removeCommandFor("some-id")).thenReturn("serialized command");
+        EventSourcingFileShoppingCartReaderWriter writer = new EventSourcingFileShoppingCartReaderWriter(environment, fileReaderProvider,fileLineWriter,commandSerializerDeserializer);
+        writer.remove("some-id");
+        verify(fileLineWriter).addLine("serialized command");
+    }
+
+    @Test
+    public void shouldWriteUpdateCommand() {
+        when(commandSerializerDeserializer.updateQuantityCommandFor("some-id", 18)).thenReturn("serialized command");
+        EventSourcingFileShoppingCartReaderWriter writer = new EventSourcingFileShoppingCartReaderWriter(environment, fileReaderProvider,fileLineWriter,commandSerializerDeserializer);
+        writer.updateQuantity("some-id", 18);
+        verify(fileLineWriter).addLine("serialized command");
     }
 
 }

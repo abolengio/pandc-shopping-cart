@@ -6,6 +6,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.verify;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -38,4 +39,18 @@ public class ShoppingCartCommandSerializerDeserializerTest {
     public void shouldThrowExceptionIfUnrecognisedCommandIsEncountered() {
         commandEncoderDecoder.read("SOMETHING,product-id-3,8", writableShoppingCart);
     }
+
+    @Test
+    public void shouldWriteRemoveCommand() {
+        fail();
+    }
+    @Test
+    public void shouldWriteAddCommand() {
+        fail();
+    }
+    @Test
+    public void shouldWriteUpdateCommand() {
+        fail();
+    }
+
 }

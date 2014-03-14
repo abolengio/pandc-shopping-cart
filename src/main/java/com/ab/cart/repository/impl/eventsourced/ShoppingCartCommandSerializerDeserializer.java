@@ -2,6 +2,8 @@ package com.ab.cart.repository.impl.eventsourced;
 
 import com.ab.cart.domain.WritableShoppingCart;
 
+import static java.lang.String.format;
+
 public class ShoppingCartCommandSerializerDeserializer {
 
     public static final String ADD_COMMAND = "ADD";
@@ -28,4 +30,15 @@ public class ShoppingCartCommandSerializerDeserializer {
         }
     }
 
+    public String addCommandFor(String productId, int quantity) {
+        return format("ADD,%s,%s",productId,quantity);
+    }
+
+    public String removeCommandFor(String productId) {
+        return null;  //To change body of created methods use File | Settings | File Templates.
+    }
+
+    public String updateQuantityCommandFor(String productId, int quantity) {
+        return null;  //To change body of created methods use File | Settings | File Templates.
+    }
 }
