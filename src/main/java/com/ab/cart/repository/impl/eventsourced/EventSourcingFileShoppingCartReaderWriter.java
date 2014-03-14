@@ -2,7 +2,7 @@ package com.ab.cart.repository.impl.eventsourced;
 
 import com.ab.cart.domain.WritableShoppingCart;
 import com.ab.cart.utils.FileLineWriter;
-import com.ab.cart.utils.FileReaderProvider;
+import com.ab.cart.utils.FileReaderFactory;
 import org.springframework.core.env.Environment;
 
 import java.io.BufferedReader;
@@ -14,15 +14,15 @@ public class EventSourcingFileShoppingCartReaderWriter implements WritableShoppi
 
     public static final String SHOPPING_CART_FILE_PATH_PROPERTY = "shopping.cart.file";
     private final String filePath;
-    private final FileReaderProvider fileReaderProvider;
+    private final FileReaderFactory fileReaderFactory;
     private final FileLineWriter fileLineWriter;
     private final ShoppingCartCommandSerializerDeserializer commandSerializerDeserializer;
 
     public EventSourcingFileShoppingCartReaderWriter(Environment environment,
-                                                     FileReaderProvider fileReaderProvider,
+                                                     FileReaderFactory fileReaderFactory,
                                                      FileLineWriter fileLineWriter,
                                                      ShoppingCartCommandSerializerDeserializer commandSerializerDeserializer) {
-        this.fileReaderProvider = fileReaderProvider;
+        this.fileReaderFactory = fileReaderFactory;
         this.fileLineWriter = fileLineWriter;
         this.commandSerializerDeserializer = commandSerializerDeserializer;
         filePath = environment.getProperty(SHOPPING_CART_FILE_PATH_PROPERTY);
@@ -48,7 +48,7 @@ public class EventSourcingFileShoppingCartReaderWriter implements WritableShoppi
     public void readInto(WritableShoppingCart writableShoppingCart) {
         BufferedReader fileReader = null;
         try {
-            fileReader = new BufferedReader(fileReaderProvider.getFileReader(filePath));
+            fileReader = new BufferedReader(fileReaderFactory.getFileReader(filePath));
             String line;
             while( (line = fileReader.readLine()) != null) {
                 commandSerializerDeserializer.read(line, writableShoppingCart);

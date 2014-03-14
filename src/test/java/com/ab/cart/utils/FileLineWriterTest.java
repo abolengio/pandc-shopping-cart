@@ -23,14 +23,14 @@ import static org.mockito.Mockito.when;
 public class FileLineWriterTest {
 
     @Mock
-    FileWriterProvider fileWriterProvider;
+    FileWriterFactory fileWriterFactory;
 
     @Test
     public void shouldWriteToWriterAndCloseItAtTheEnd() throws IOException {
         StringWriter out = new StringWriter();
         BufferedWriter bufferedWriter = new BufferedWriter(out);
-        when(fileWriterProvider.getFileWriter("filePath")).thenReturn(bufferedWriter);
-        FileLineWriter writer = new FileLineWriter(fileWriterProvider, "filePath");
+        when(fileWriterFactory.getFileWriter("filePath")).thenReturn(bufferedWriter);
+        FileLineWriter writer = new FileLineWriter(fileWriterFactory, "filePath");
         writer.addLine("some line");
         assertThat(out.toString(), is("some line\n"));
         assertThat(writerIsClosed(bufferedWriter), is(true));
@@ -41,8 +41,8 @@ public class FileLineWriterTest {
     public void shouldCloseWriterWhenExceptionOccurs() throws IOException {
         BufferedWriter bufferedWriter = mock(BufferedWriter.class);
         doThrow(new IOException()).when(bufferedWriter).write(anyString());
-        when(fileWriterProvider.getFileWriter("filePath")).thenReturn(bufferedWriter);
-        FileLineWriter writer = new FileLineWriter(fileWriterProvider, "filePath");
+        when(fileWriterFactory.getFileWriter("filePath")).thenReturn(bufferedWriter);
+        FileLineWriter writer = new FileLineWriter(fileWriterFactory, "filePath");
         try {
             writer.addLine("does not really matter");
             fail("Exception expected");

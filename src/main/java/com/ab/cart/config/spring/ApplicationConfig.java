@@ -15,8 +15,8 @@ import com.ab.cart.repository.impl.eventsourced.EventSourcingFileShoppingCartRea
 import com.ab.cart.repository.impl.eventsourced.EventSourcingShoppingCartItemsRepository;
 import com.ab.cart.repository.impl.eventsourced.ShoppingCartCommandSerializerDeserializer;
 import com.ab.cart.utils.FileLineWriter;
-import com.ab.cart.utils.FileReaderProvider;
-import com.ab.cart.utils.FileWriterProvider;
+import com.ab.cart.utils.FileReaderFactory;
+import com.ab.cart.utils.FileWriterFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -67,8 +67,8 @@ public class ApplicationConfig {
     }
 
     @Bean
-    public FileWriterProvider fileWriterProvider() {
-        return new FileWriterProvider();
+    public FileWriterFactory fileWriterProvider() {
+        return new FileWriterFactory();
     }
 
     @Bean
@@ -82,8 +82,8 @@ public class ApplicationConfig {
     }
 
     @Bean
-    public FileReaderProvider fileReaderProvider() {
-        return new FileReaderProvider();
+    public FileReaderFactory fileReaderProvider() {
+        return new FileReaderFactory();
     }
 
     @Bean

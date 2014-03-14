@@ -1,7 +1,7 @@
 package com.ab.cart.repository.impl;
 
 import com.ab.cart.domain.Product;
-import com.ab.cart.utils.FileReaderProvider;
+import com.ab.cart.utils.FileReaderFactory;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -23,7 +23,7 @@ import static org.mockito.Mockito.when;
 public class CsvFileProductProviderTest {
 
     @Mock
-    FileReaderProvider fileReaderProvider;
+    FileReaderFactory fileReaderFactory;
     @Mock
     ProductCsvEntryParser productCsvEntryParser;
 
@@ -31,11 +31,11 @@ public class CsvFileProductProviderTest {
     public void shouldParseOneLinerFile() throws IOException {
         MockEnvironment environment = new MockEnvironment()
                                         .withProperty(CsvFileProductProvider.PRODUCT_CSV_FILE_PATH_PROPERTY, "blah-file");
-        when(fileReaderProvider.getFileReader("blah-file")).thenReturn(getReaderWith("one liner"));
+        when(fileReaderFactory.getFileReader("blah-file")).thenReturn(getReaderWith("one liner"));
         Product product1 = mock(Product.class);
         when(productCsvEntryParser.parseEntry("one liner")).thenReturn(product1);
         CsvFileProductProvider provider = new CsvFileProductProvider(environment
-                                                                    , fileReaderProvider
+                                                                    , fileReaderFactory
                                                                     , productCsvEntryParser);
         List<Product> products = provider.parse();
         assertThat(products, hasSize(1));
@@ -46,9 +46,9 @@ public class CsvFileProductProviderTest {
     public void shouldParseEmptyFile() throws IOException {
         MockEnvironment environment = new MockEnvironment()
                                         .withProperty(CsvFileProductProvider.PRODUCT_CSV_FILE_PATH_PROPERTY, "blah-file");
-        when(fileReaderProvider.getFileReader("blah-file")).thenReturn(getReaderWith(""));
+        when(fileReaderFactory.getFileReader("blah-file")).thenReturn(getReaderWith(""));
         CsvFileProductProvider provider = new CsvFileProductProvider(environment
-                                                                    , fileReaderProvider
+                                                                    , fileReaderFactory
                                                                     , productCsvEntryParser);
         List<Product> products = provider.parse();
         assertThat(products, hasSize(0));
@@ -58,13 +58,13 @@ public class CsvFileProductProviderTest {
     public void shouldParseFileContainingSeveralLines() throws IOException {
         MockEnvironment environment = new MockEnvironment()
                                         .withProperty(CsvFileProductProvider.PRODUCT_CSV_FILE_PATH_PROPERTY, "blah-file");
-        when(fileReaderProvider.getFileReader("blah-file")).thenReturn(getReaderWith("first line\nsecond line"));
+        when(fileReaderFactory.getFileReader("blah-file")).thenReturn(getReaderWith("first line\nsecond line"));
         Product product1 = mock(Product.class);
         when(productCsvEntryParser.parseEntry("first line")).thenReturn(product1);
         Product product2 = mock(Product.class);
         when(productCsvEntryParser.parseEntry("second line")).thenReturn(product2);
         CsvFileProductProvider provider = new CsvFileProductProvider(environment
-                                                                    , fileReaderProvider
+                                                                    , fileReaderFactory
                                                                     , productCsvEntryParser);
         List<Product> products = provider.parse();
         assertThat(products, hasSize(2));
@@ -77,13 +77,13 @@ public class CsvFileProductProviderTest {
         MockEnvironment environment = new MockEnvironment()
                                         .withProperty(CsvFileProductProvider.PRODUCT_CSV_FILE_PATH_PROPERTY, "blah-file");
         String content = "first line\n\nsecond line\n\n  ";
-        when(fileReaderProvider.getFileReader("blah-file")).thenReturn(getReaderWith(content));
+        when(fileReaderFactory.getFileReader("blah-file")).thenReturn(getReaderWith(content));
         Product product1 = mock(Product.class);
         when(productCsvEntryParser.parseEntry("first line")).thenReturn(product1);
         Product product2 = mock(Product.class);
         when(productCsvEntryParser.parseEntry("second line")).thenReturn(product2);
         CsvFileProductProvider provider = new CsvFileProductProvider(environment
-                                                                    , fileReaderProvider
+                                                                    , fileReaderFactory
                                                                     , productCsvEntryParser);
         List<Product> products = provider.parse();
         assertThat(products, hasSize(2));

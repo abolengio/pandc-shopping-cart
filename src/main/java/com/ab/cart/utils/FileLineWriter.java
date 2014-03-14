@@ -5,19 +5,19 @@ import java.io.IOException;
 
 public class FileLineWriter {
 
-    private final FileWriterProvider fileWriterProvider;
+    private final FileWriterFactory fileWriterFactory;
     private final String filePath;
 
-    public FileLineWriter(FileWriterProvider fileWriterProvider, String filePath) {
+    public FileLineWriter(FileWriterFactory fileWriterFactory, String filePath) {
 
-        this.fileWriterProvider = fileWriterProvider;
+        this.fileWriterFactory = fileWriterFactory;
         this.filePath = filePath;
     }
 
     public void addLine(String line) {
         BufferedWriter fileWriter = null;
         try {
-            fileWriter = fileWriterProvider.getFileWriter(filePath);
+            fileWriter = fileWriterFactory.getFileWriter(filePath);
             fileWriter.write(line);
             fileWriter.newLine();
         } catch (IOException exc) {
