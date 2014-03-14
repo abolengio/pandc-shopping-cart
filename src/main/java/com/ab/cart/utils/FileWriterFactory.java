@@ -7,6 +7,6 @@ import java.io.IOException;
 public class FileWriterFactory {
 
     public BufferedWriter getFileWriter(String filePath) throws IOException {
-        return new BufferedWriter(new FileWriter(filePath));
+        return new BufferedWriter(new FileWriter(filePath, true));
     }
 }
