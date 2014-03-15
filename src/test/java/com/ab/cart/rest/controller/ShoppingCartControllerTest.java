@@ -23,6 +23,7 @@ import static com.ab.cart.domain.builders.EffectivePriceProductBuilder.productWi
 import static com.ab.cart.domain.builders.ExpandedCartItemBuilder.cartItem;
 import static com.ab.cart.domain.builders.ReadableShoppingCartBuilder.shoppingCart;
 import static com.jayway.jsonassert.impl.matcher.IsCollectionWithSize.hasSize;
+import static org.apache.commons.lang.StringUtils.replace;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
@@ -108,6 +109,38 @@ public class ShoppingCartControllerTest {
     }
 
     @Test
+    public void shouldIncludeLinks() throws Exception{
+
+     //   Product
+        EffectivePriceProduct product1 = productWithId("product1-id").name("product 1").price(12.38).build();
+        when(mockReadableShoppingCartProvider
+                    .getReadableShoppingCart()).thenReturn(
+                                                    shoppingCart().withItems(
+                                                            cartItem().with(product1).quantity(1).build()
+                                                        )
+                                                        .withSubTotal(23.89).build());
+
+        mockMvc.perform(get(UriFor.cart))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(APPLICATION_JSON_UTF8))
+                .andExpect(jsonPath("$.links", hasSize(2)))
+                .andExpect(jsonPath("$.links[0].href", is(UriFor.cart)))
+                .andExpect(jsonPath("$.links[0].rel", is("self")))
+                .andExpect(jsonPath("$.links[0].method", is("GET")))
+                .andExpect(jsonPath("$.links[1].href", is(UriFor.cartItems)))
+                .andExpect(jsonPath("$.links[1].rel", is("/shopping-cart/add-item")))
+                .andExpect(jsonPath("$.links[1].method", is("POST")))
+                .andExpect(jsonPath("$.items[0].links", hasSize(2)))
+                .andExpect(jsonPath("$.items[0].links[0].href", is(uriForCartItemWithProductId("product1-id"))))
+                .andExpect(jsonPath("$.items[0].links[0].rel", is("/shopping-cart/remove-item")))
+                .andExpect(jsonPath("$.items[0].links[0].method", is("DELETE")))
+                .andExpect(jsonPath("$.items[0].links[1].href", is(uriForCartItemWithProductId("product1-id"))))
+                .andExpect(jsonPath("$.items[0].links[1].rel", is("/shopping-cart/update-quantity")))
+                .andExpect(jsonPath("$.items[0].links[1].method", is("PUT")))
+                ;
+    }
+
+    @Test
     public void shouldReturnCartWhenSomeItemsHaveRebateDiscount() throws Exception{
 
         EffectivePriceProduct product1 = productWithId("product1-id").name("product 1").price(12.38).build();
@@ -143,6 +176,7 @@ public class ShoppingCartControllerTest {
         ;
     }
 
+    //todo test case when Content Type is NOT supplied in PUT request
 
     @Test
     public void shouldAddItem() throws Exception{
@@ -165,11 +199,16 @@ public class ShoppingCartControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(APPLICATION_JSON_UTF8))
                 .andExpect(jsonPath("$.items", hasSize(2)))
-                .andExpect(jsonPath("$.subTotal", is(23.89)));
+                .andExpect(jsonPath("$.subTotal.amount", is(23.89)))
+                .andExpect(jsonPath("$.subTotal.currency", is("EUR")))
+                ;
 
         verify(writableShoppingCart).add("product1-id", 2);
     }
 
     //todo test validation
 
+    private String uriForCartItemWithProductId(String productId) {
+        return replace(UriFor.cartItem, "{productId}" , productId);
+    }
 }
