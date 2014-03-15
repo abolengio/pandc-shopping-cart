@@ -31,6 +31,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -180,27 +181,13 @@ public class ShoppingCartControllerTest {
 
     @Test
     public void shouldAddItem() throws Exception{
-        EffectivePriceProduct product1 = productWithId("product1-id").name("product 1").price(12.38).build();
-        EffectivePriceProduct product2 = productWithId("product2-id").name("product 2 name").price(8.50)
-                                    .rebateTimeframe().start("2014-04-01T12:37:00").end("2014-05-01T12:37:00").build();
-
-        when(mockReadableShoppingCartProvider
-                    .getReadableShoppingCart()).thenReturn(
-                                                    shoppingCart().withItems(
-                                                            cartItem().with(product1).quantity(1).build()
-                                                            ,cartItem().with(product2).quantity(2).build()
-                                                        )
-                                                        .withSubTotal(23.89).build());
 
         mockMvc.perform(post(UriFor.cartItems)
                                 .contentType(APPLICATION_JSON_UTF8)
                                 .content("{\"productId\":\"product1-id\"," +
                                         "\"quantity\":2}"))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(APPLICATION_JSON_UTF8))
-                .andExpect(jsonPath("$.items", hasSize(2)))
-                .andExpect(jsonPath("$.subTotal.amount", is(23.89)))
-                .andExpect(jsonPath("$.subTotal.currency", is("EUR")))
+                .andExpect(status().is(303))
+                .andExpect(header().string("Location",UriFor.cart))
                 ;
 
         verify(writableShoppingCart).add("product1-id", 2);

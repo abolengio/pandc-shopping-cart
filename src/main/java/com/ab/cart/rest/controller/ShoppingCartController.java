@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.servlet.View;
+import org.springframework.web.servlet.view.RedirectView;
 
 @Controller
 public class ShoppingCartController {
@@ -29,7 +31,7 @@ public class ShoppingCartController {
     @ResponseBody
     public ShoppingCartResource shoppingCart() {
         ReadableShoppingCart readableShoppingCart = readableShoppingCartProvider.getReadableShoppingCart();
-        return new ShoppingCartResource(readableShoppingCart); //todo use converter rather than constructor
+        return new ShoppingCartResource(readableShoppingCart);
 
     }
 
@@ -38,14 +40,27 @@ public class ShoppingCartController {
         ex.printStackTrace();   //todo
     }
 
-    @RequestMapping(value = UriFor.cartItems, method = RequestMethod.POST)
+    /*
+    @ExceptionHandler
     @ResponseBody
-    public ShoppingCartResource addItem(@RequestBody CartItemParameter cartItem) {
-        writableShoppingCart.add(cartItem.getProductId(), cartItem.getQuantity());
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public RestError resolveBindingException ( MethodArgumentNotValidException methodArgumentNotValidException, Locale locale )
+    {
+        BindingResult bindingResult = methodArgumentNotValidException.getBindingResult();
+        return getRestError(bindingResult, locale);
+    }
 
-        //todo what is the response code
-        ReadableShoppingCart readableShoppingCart = readableShoppingCartProvider.getReadableShoppingCart();
-        return new ShoppingCartResource(readableShoppingCart); //todo refactor to avoid duplication
+    @ResponseStatus(value=HttpStatus.NOT_FOUND, reason="No such Order")  // 404
+    public class OrderNotFoundException extends RuntimeException {
+        // ...
+    }
+
+     */
+
+    @RequestMapping(value = UriFor.cartItems, method = RequestMethod.POST)
+    public View addItem(@RequestBody CartItemParameter cartItem) {
+        writableShoppingCart.add(cartItem.getProductId(), cartItem.getQuantity());
+        return new RedirectView(UriFor.cart, true, false);
     }
 
 
