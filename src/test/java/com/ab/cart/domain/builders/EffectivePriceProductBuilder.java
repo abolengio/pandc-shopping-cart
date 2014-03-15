@@ -3,13 +3,14 @@ package com.ab.cart.domain.builders;
 import com.ab.cart.domain.EffectivePriceProduct;
 import org.joda.money.CurrencyUnit;
 import org.joda.money.Money;
+import org.joda.time.DateTimeZone;
 import org.joda.time.Interval;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
 public class EffectivePriceProductBuilder {
 
-    private static DateTimeFormatter formatter = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss");
+    private static DateTimeFormatter formatter = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss").withZone(DateTimeZone.UTC);    //todo sync timezones
 
     String productId = null;
     String name = "Default name";

@@ -6,7 +6,6 @@ import com.ab.cart.domain.EffectivePriceProduct;
 import com.ab.cart.domain.ReadableShoppingCartProvider;
 import com.ab.cart.domain.WritableShoppingCart;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +24,6 @@ import static com.ab.cart.domain.builders.ExpandedCartItemBuilder.cartItem;
 import static com.ab.cart.domain.builders.ReadableShoppingCartBuilder.shoppingCart;
 import static com.jayway.jsonassert.impl.matcher.IsCollectionWithSize.hasSize;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.fail;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -69,7 +67,9 @@ public class ShoppingCartControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(APPLICATION_JSON_UTF8))
                 .andExpect(jsonPath("$.items", hasSize(0)))
-                .andExpect(jsonPath("$.subTotal", is(0.0))); //todo change formatting
+                .andExpect(jsonPath("$.subTotal.amount", is(0.0)))
+                .andExpect(jsonPath("$.subTotal.currency", is("EUR")))
+        ;
     }
 
     @Test
@@ -77,8 +77,7 @@ public class ShoppingCartControllerTest {
 
      //   Product
         EffectivePriceProduct product1 = productWithId("product1-id").name("product 1").price(12.38).build();
-        EffectivePriceProduct product2 = productWithId("product2-id").name("product 2 name").price(8.50)
-                                    .rebateTimeframe().start("2014-04-01T12:37:00").end("2014-05-01T12:37:00").build();
+        EffectivePriceProduct product2 = productWithId("product2-id").name("product 2 name").price(8.50).build();
         when(mockReadableShoppingCartProvider
                     .getReadableShoppingCart()).thenReturn(
                                                     shoppingCart().withItems(
@@ -93,13 +92,22 @@ public class ShoppingCartControllerTest {
                 .andExpect(jsonPath("$.items", hasSize(2)))
                 .andExpect(jsonPath("$.items[0].productId", is("product1-id")))
                 .andExpect(jsonPath("$.items[0].quantity", is(1)))
+                .andExpect(jsonPath("$.items[0].product.name", is("product 1")))
+                .andExpect(jsonPath("$.items[0].product.effectivePrice.amount", is(12.38)))
+                .andExpect(jsonPath("$.items[0].product.effectivePrice.currency", is("EUR")))
                 .andExpect(jsonPath("$.items[1].productId", is("product2-id")))
                 .andExpect(jsonPath("$.items[1].quantity", is(2)))
-                .andExpect(jsonPath("$.subTotal", is(23.89)));
+                .andExpect(jsonPath("$.items[1].product.name", is("product 2 name")))
+                .andExpect(jsonPath("$.items[1].product.effectivePrice.amount", is(8.5)))
+                .andExpect(jsonPath("$.items[1].product.effectivePrice.currency", is("EUR")))
+                .andExpect(jsonPath("$.subTotal.amount", is(23.89)))
+                .andExpect(jsonPath("$.subTotal.currency", is("EUR"))
+                );
+
+        //todo check item subtotals
     }
 
     @Test
-    @Ignore
     public void shouldReturnCartWhenSomeItemsHaveRebateDiscount() throws Exception{
 
         EffectivePriceProduct product1 = productWithId("product1-id").name("product 1").price(12.38).build();
@@ -117,8 +125,22 @@ public class ShoppingCartControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(APPLICATION_JSON_UTF8))
                 .andExpect(jsonPath("$.items", hasSize(2)))
-                .andExpect(jsonPath("$.subTotal", is(23.89)));
-        fail();
+                .andExpect(jsonPath("$.items[0].productId", is("product1-id")))
+                .andExpect(jsonPath("$.items[0].quantity", is(1)))
+                .andExpect(jsonPath("$.items[0].product.name", is("product 1")))
+                .andExpect(jsonPath("$.items[0].product.effectivePrice.amount", is(12.38)))
+                .andExpect(jsonPath("$.items[0].product.effectivePrice.currency", is("EUR")))
+                .andExpect(jsonPath("$.items[0].product.rebateTimeFrame").doesNotExist())
+                .andExpect(jsonPath("$.items[1].productId", is("product2-id")))
+                .andExpect(jsonPath("$.items[1].quantity", is(2)))
+                .andExpect(jsonPath("$.items[1].product.name", is("product 2 name")))
+                .andExpect(jsonPath("$.items[1].product.effectivePrice.amount", is(8.5)))
+                .andExpect(jsonPath("$.items[1].product.effectivePrice.currency", is("EUR")))
+                .andExpect(jsonPath("$.items[1].product.rebateTimeFrame.start", is("2014-04-01T12:37:00.000Z")))
+                .andExpect(jsonPath("$.items[1].product.rebateTimeFrame.end", is("2014-05-01T12:37:00.000Z")))
+                .andExpect(jsonPath("$.subTotal.amount", is(23.89)))
+                .andExpect(jsonPath("$.subTotal.currency", is("EUR")))
+        ;
     }
 
 

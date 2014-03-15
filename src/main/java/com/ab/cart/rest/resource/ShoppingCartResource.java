@@ -2,9 +2,9 @@ package com.ab.cart.rest.resource;
 
 import com.ab.cart.domain.ExpandedCartItem;
 import com.ab.cart.domain.ReadableShoppingCart;
+import org.joda.money.Money;
 import org.springframework.hateoas.ResourceSupport;
 
-import java.math.BigDecimal;
 import java.util.Collection;
 
 public class ShoppingCartResource extends ResourceSupport {
@@ -19,8 +19,8 @@ public class ShoppingCartResource extends ResourceSupport {
         return readableShoppingCart.getItems();
     }
 
-    public BigDecimal getSubTotal() {
-        return readableShoppingCart.getSubTotal().getAmount();
+    public Money getSubTotal() {
+        return readableShoppingCart.getSubTotal();
     }
 
 
