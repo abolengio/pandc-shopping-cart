@@ -1,6 +1,8 @@
 package com.ab.cart.config.spring;
 
+import com.ab.cart.domain.Clock;
 import com.ab.cart.domain.EffectivePriceProductProvider;
+import com.ab.cart.domain.PricingStrategy;
 import com.ab.cart.domain.Product;
 import com.ab.cart.domain.ReadableShoppingCartProvider;
 import com.ab.cart.domain.converters.CartItemToExpandedCartItemTransformer;
@@ -61,9 +63,14 @@ public class ApplicationConfig {
     }
 
     @Bean
+    public PricingStrategy pricingStrategy() {
+        return new PricingStrategy(new Clock());
+    }
+
+    @Bean
     @Autowired
     public EffectivePriceProductProvider effectivePriceProductProvider(ProductCatalogue productCatalogue) {
-        return new EffectivePriceProductProvider(productCatalogue);
+        return new EffectivePriceProductProvider(productCatalogue, pricingStrategy());
     }
 
     @Bean

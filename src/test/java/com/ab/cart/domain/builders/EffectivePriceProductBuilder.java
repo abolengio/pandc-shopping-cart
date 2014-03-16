@@ -1,22 +1,24 @@
 package com.ab.cart.domain.builders;
 
 import com.ab.cart.domain.EffectivePriceProduct;
+import com.ab.cart.utils.Preferences;
 import org.joda.money.CurrencyUnit;
 import org.joda.money.Money;
-import org.joda.time.DateTimeZone;
 import org.joda.time.Interval;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
 public class EffectivePriceProductBuilder {
 
-    private static DateTimeFormatter formatter = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss").withZone(DateTimeZone.UTC);    //todo sync timezones
+    private static DateTimeFormatter formatter = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss").withZone(Preferences.SYSTEM_TIME_ZONE);
+    //todo move to central place to sync timezones
 
     String productId = null;
     String name = "Default name";
     Money price = Money.of(CurrencyUnit.EUR, 9.99);
     String rebateTimeFrameStart = null;
     String rebateTimeFrameEnd = null;
+    private Money effectivePrice = price;
 
     public static EffectivePriceProductBuilder productWithId(String productId) {
         return new EffectivePriceProductBuilder(productId);
@@ -34,7 +36,7 @@ public class EffectivePriceProductBuilder {
             rebateTimeFrame = new Interval(formatter.parseDateTime(rebateTimeFrameStart), formatter.parseDateTime(rebateTimeFrameEnd));
 
         } else throw new IllegalArgumentException("Both start and end of rebate timeframe should be specified");
-        return new EffectivePriceProduct(productId, name, price, rebateTimeFrame);
+        return new EffectivePriceProduct(productId, name, price, rebateTimeFrame, effectivePrice);
 
     }
 
@@ -45,6 +47,11 @@ public class EffectivePriceProductBuilder {
 
     public EffectivePriceProductBuilder price(Double price) {
         this.price = Money.of(CurrencyUnit.EUR, price);
+        return this;
+    }
+
+    public EffectivePriceProductBuilder effectivePrice(Double price) {
+        this.effectivePrice = Money.of(CurrencyUnit.EUR, price);
         return this;
     }
 

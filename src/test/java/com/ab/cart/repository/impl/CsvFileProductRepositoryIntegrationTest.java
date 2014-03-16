@@ -29,6 +29,7 @@ public class CsvFileProductRepositoryIntegrationTest {
         assertThat(product.getPrice(), is(Money.of(CurrencyUnit.EUR, 9.9)));
     }
 
+    //todo why so few test cases ?
     /*
     1001,Dress with pink flowers,29.99,2014-02-28:15:00:00-2014-02-28:16:00:00
     1002,Green Shirt,9.90,

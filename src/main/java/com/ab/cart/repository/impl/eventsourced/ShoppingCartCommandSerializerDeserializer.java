@@ -20,7 +20,7 @@ public class ShoppingCartCommandSerializerDeserializer {
         if(ADD_COMMAND.equalsIgnoreCase(command)) {
             int quantity = Integer.parseInt(commandData[2]);
             writableShoppingCart.add(productId, quantity);
-        } else if(UPDATE_COMMAND.equalsIgnoreCase(command)) {
+        } else if(UPDATE_COMMAND.equalsIgnoreCase(command)) {          //todo does not scale well as is sequence dependent because of the update command
             int quantity = Integer.parseInt(commandData[2]);
             writableShoppingCart.updateQuantity(productId, quantity);
         } else if(REMOVE_COMMAND.equalsIgnoreCase(command)) {

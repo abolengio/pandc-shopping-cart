@@ -1,13 +1,19 @@
 package com.ab.cart.domain.builders;
 
-import org.joda.time.MutableInterval;
+import org.joda.time.DateTime;
+import org.joda.time.Interval;
 import org.joda.time.ReadableInterval;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
+import static java.lang.String.format;
+
 public class TimeFrameBuilder {
+
     private static DateTimeFormatter formatter = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss");
-    private MutableInterval interval = new MutableInterval();
+
+    private DateTime start = null;
+    private DateTime end = null;
 
     public TimeFrameBuilder() {
     }
@@ -17,16 +23,20 @@ public class TimeFrameBuilder {
     }
 
     public TimeFrameBuilder start(String start) {
-        interval.setStart(formatter.parseDateTime(start));
+        this.start = formatter.parseDateTime(start);
         return this;
     }
 
     public TimeFrameBuilder end(String end) {
-        interval.setEnd(formatter.parseDateTime(end));
+        this.end = formatter.parseDateTime(end);
         return this;
     }
 
     public ReadableInterval build() {
-        return interval;
+        if(start == null || end == null) {
+            throw new IllegalArgumentException(format("Error creating interval. Both start and end must be specified when" +
+                                                    " creating Interval. What's been provided: start=%s end=%s",start, end));
+        }
+        return new Interval(start, end);
     }
 }

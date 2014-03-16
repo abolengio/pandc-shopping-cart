@@ -5,11 +5,14 @@ import org.joda.time.ReadableInterval;
 
 public class EffectivePriceProduct extends Product {
 
-    public EffectivePriceProduct(String productId, String name, Money originalPrice, ReadableInterval rebateTimeFrame) {   //todo use builder ?
+    private final Money effectivePrice;
+
+    public EffectivePriceProduct(String productId, String name, Money originalPrice, ReadableInterval rebateTimeFrame, Money effectivePrice) {   //todo use builder ?
         super( productId,  name,  originalPrice, rebateTimeFrame);
+        this.effectivePrice = effectivePrice;
     }
 
     public Money getEffectivePrice() {
-        return getPrice();  //todo implement
+        return effectivePrice;
     }
 }

@@ -78,8 +78,8 @@ public class ShoppingCartControllerTest {
     public void shouldReturnCartWhenItIsNotEmpty() throws Exception{
 
      //   Product
-        EffectivePriceProduct product1 = productWithId("product1-id").name("product 1").price(12.38).build();
-        EffectivePriceProduct product2 = productWithId("product2-id").name("product 2 name").price(8.50).build();
+        EffectivePriceProduct product1 = productWithId("product1-id").name("product 1").price(12.38).effectivePrice(3.90).build();
+        EffectivePriceProduct product2 = productWithId("product2-id").name("product 2 name").price(8.50).effectivePrice(8.19).build();
         when(mockReadableShoppingCartProvider
                     .getReadableShoppingCart()).thenReturn(
                                                     shoppingCart().withItems(
@@ -95,12 +95,16 @@ public class ShoppingCartControllerTest {
                 .andExpect(jsonPath("$.items[0].productId", is("product1-id")))
                 .andExpect(jsonPath("$.items[0].quantity", is(1)))
                 .andExpect(jsonPath("$.items[0].product.name", is("product 1")))
-                .andExpect(jsonPath("$.items[0].product.effectivePrice.amount", is(12.38)))
+                .andExpect(jsonPath("$.items[0].product.price.amount", is(12.38)))
+                .andExpect(jsonPath("$.items[0].product.price.currency", is("EUR")))
+                .andExpect(jsonPath("$.items[0].product.effectivePrice.amount", is(3.90)))
                 .andExpect(jsonPath("$.items[0].product.effectivePrice.currency", is("EUR")))
                 .andExpect(jsonPath("$.items[1].productId", is("product2-id")))
                 .andExpect(jsonPath("$.items[1].quantity", is(2)))
                 .andExpect(jsonPath("$.items[1].product.name", is("product 2 name")))
-                .andExpect(jsonPath("$.items[1].product.effectivePrice.amount", is(8.5)))
+                .andExpect(jsonPath("$.items[1].product.price.amount", is(8.5)))
+                .andExpect(jsonPath("$.items[1].product.price.currency", is("EUR")))
+                .andExpect(jsonPath("$.items[1].product.effectivePrice.amount", is(8.19)))
                 .andExpect(jsonPath("$.items[1].product.effectivePrice.currency", is("EUR")))
                 .andExpect(jsonPath("$.subTotal.amount", is(23.89)))
                 .andExpect(jsonPath("$.subTotal.currency", is("EUR"))
@@ -144,8 +148,8 @@ public class ShoppingCartControllerTest {
     @Test
     public void shouldReturnCartWhenSomeItemsHaveRebateDiscount() throws Exception{
 
-        EffectivePriceProduct product1 = productWithId("product1-id").name("product 1").price(12.38).build();
-        EffectivePriceProduct product2 = productWithId("product2-id").name("product 2 name").price(8.50)
+        EffectivePriceProduct product1 = productWithId("product1-id").name("product 1").price(12.38).effectivePrice(3.20).build();
+        EffectivePriceProduct product2 = productWithId("product2-id").name("product 2 name").price(8.50).effectivePrice(3.70)
                                     .rebateTimeframe().start("2014-04-01T12:37:00").end("2014-05-01T12:37:00").build();
         when(mockReadableShoppingCartProvider
                     .getReadableShoppingCart()).thenReturn(
@@ -162,13 +166,17 @@ public class ShoppingCartControllerTest {
                 .andExpect(jsonPath("$.items[0].productId", is("product1-id")))
                 .andExpect(jsonPath("$.items[0].quantity", is(1)))
                 .andExpect(jsonPath("$.items[0].product.name", is("product 1")))
-                .andExpect(jsonPath("$.items[0].product.effectivePrice.amount", is(12.38)))
+                .andExpect(jsonPath("$.items[0].product.price.amount", is(12.38)))
+                .andExpect(jsonPath("$.items[0].product.price.currency", is("EUR")))
+                .andExpect(jsonPath("$.items[0].product.effectivePrice.amount", is(3.20)))
                 .andExpect(jsonPath("$.items[0].product.effectivePrice.currency", is("EUR")))
                 .andExpect(jsonPath("$.items[0].product.rebateTimeFrame").doesNotExist())
                 .andExpect(jsonPath("$.items[1].productId", is("product2-id")))
                 .andExpect(jsonPath("$.items[1].quantity", is(2)))
                 .andExpect(jsonPath("$.items[1].product.name", is("product 2 name")))
-                .andExpect(jsonPath("$.items[1].product.effectivePrice.amount", is(8.5)))
+                .andExpect(jsonPath("$.items[1].product.price.amount", is(8.5)))
+                .andExpect(jsonPath("$.items[1].product.price.currency", is("EUR")))
+                .andExpect(jsonPath("$.items[1].product.effectivePrice.amount", is(3.70)))
                 .andExpect(jsonPath("$.items[1].product.effectivePrice.currency", is("EUR")))
                 .andExpect(jsonPath("$.items[1].product.rebateTimeFrame.start", is("2014-04-01T12:37:00.000Z")))
                 .andExpect(jsonPath("$.items[1].product.rebateTimeFrame.end", is("2014-05-01T12:37:00.000Z")))

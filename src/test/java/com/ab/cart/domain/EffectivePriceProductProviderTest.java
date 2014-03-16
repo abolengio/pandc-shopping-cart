@@ -3,6 +3,7 @@ package com.ab.cart.domain;
 import com.ab.cart.domain.productcatalogue.ProductCatalogue;
 import org.joda.money.CurrencyUnit;
 import org.joda.money.Money;
+import org.joda.time.ReadableInterval;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -21,38 +22,37 @@ public class EffectivePriceProductProviderTest {
     @Mock
     ProductCatalogue productCatalogue;
 
+    @Mock
+    PricingStrategy pricingStrategy;
+
     @Test
-    public void shouldSetEffectivePriceToOriginalPriceWhenThereIsNoRebate() {
+    public void shouldCopyProductDetailsFromProductAndSetEffectivePrice() {
         //given
-        Money originalPrice = Money.of(CurrencyUnit.EUR, 83.9);
-        Product product = new Product("some-product-id", "some description", originalPrice);
+        Product product = new Product("some-product-id", "some description", Money.of(CurrencyUnit.EUR, 83.9));
         when(productCatalogue.getProduct("some-product-id")).thenReturn(product);
+        when(pricingStrategy.getEffectivePrice(product)).thenReturn(Money.of(CurrencyUnit.EUR, 293.83));
         //when
-        EffectivePriceProductProvider pricingProvider = new EffectivePriceProductProvider(productCatalogue);
+        EffectivePriceProductProvider pricingProvider = new EffectivePriceProductProvider(productCatalogue, pricingStrategy);
         EffectivePriceProduct effectivePriceProduct = pricingProvider.getProduct("some-product-id");
         //then
-        assertThat(effectivePriceProduct.getEffectivePrice(), is(equalTo(originalPrice)));
         assertThat(effectivePriceProduct.getName(), is("some description"));
         assertThat(effectivePriceProduct.getProductId(), is("some-product-id"));
-        assertThat(effectivePriceProduct.getPrice(), is(originalPrice));
+        assertThat(effectivePriceProduct.getPrice(), is(Money.of(CurrencyUnit.EUR, 83.9)));
         assertThat(effectivePriceProduct.getRebateTimeFrame(), is(nullValue()));
+        assertThat(effectivePriceProduct.getEffectivePrice(), is(Money.of(CurrencyUnit.EUR, 293.83)));
     }
 
     @Test
-    public void shouldSetEffectivePriceToDiscountedPriceWhenThereIsRebateAndTheTimeIsRight() {
+    public void shouldCopyRebateTimeFrameWhenProductHasOne() {
         //given
-        Money originalPrice = Money.of(CurrencyUnit.EUR, 100.0);
-        Product product = new Product("some-product-id", "some description", originalPrice,
-                                        timeFrame().start("2014-04-01T12:37:00").end("2014-05-01T12:37:00").build());
+        ReadableInterval rebateTimeFrame = timeFrame().start("2014-04-01T12:37:00").end("2014-05-01T12:37:00").build();
+        Product product = new Product("some-product-id", "some description", Money.of(CurrencyUnit.EUR, 100.0), rebateTimeFrame);
         when(productCatalogue.getProduct("some-product-id")).thenReturn(product);
+        when(pricingStrategy.getEffectivePrice(product)).thenReturn(Money.of(CurrencyUnit.EUR, 293.83));
         //when
-        EffectivePriceProductProvider pricingProvider = new EffectivePriceProductProvider(productCatalogue);
+        EffectivePriceProductProvider pricingProvider = new EffectivePriceProductProvider(productCatalogue, pricingStrategy);
         EffectivePriceProduct effectivePriceProduct = pricingProvider.getProduct("some-product-id");
         //then
-        assertThat(effectivePriceProduct.getEffectivePrice(), is(Money.of(CurrencyUnit.EUR, 80.0)));
-        assertThat(effectivePriceProduct.getName(), is("some description"));
-        assertThat(effectivePriceProduct.getProductId(), is("some-product-id"));
-        assertThat(effectivePriceProduct.getPrice(), is(originalPrice));
-        assertThat(effectivePriceProduct.getRebateTimeFrame(), is(nullValue()));
+        assertThat(effectivePriceProduct.getRebateTimeFrame(), is(equalTo(rebateTimeFrame)));
     }
 }
