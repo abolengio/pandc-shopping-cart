@@ -10,7 +10,6 @@ public class PricingStrategy {
     private Clock clock;
 
     public PricingStrategy(Clock clock) {
-        //To change body of created methods use File | Settings | File Templates.
         this.clock = clock;
     }
 

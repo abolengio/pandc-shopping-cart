@@ -8,8 +8,8 @@ import com.ab.cart.domain.ReadableShoppingCartProvider;
 import com.ab.cart.domain.converters.CartItemToExpandedCartItemTransformer;
 import com.ab.cart.domain.productcatalogue.ProductCatalogue;
 import com.ab.cart.repository.ShoppingCartItemsRepository;
-import com.ab.cart.repository.impl.CsvFileProductProvider;
 import com.ab.cart.repository.impl.ProductCsvEntryParser;
+import com.ab.cart.repository.impl.ProductCsvFileReader;
 import com.ab.cart.repository.impl.ProductRebateTimeFrameParser;
 import com.ab.cart.repository.impl.StaticProductRepository;
 import com.ab.cart.repository.impl.eventsourced.AggregatingShoppingCartFactory;
@@ -95,14 +95,14 @@ public class ApplicationConfig {
 
     @Bean
     @Autowired
-    public CsvFileProductProvider csvFileProductProvider(Environment environment) {
-        return new CsvFileProductProvider(environment, fileReaderProvider(), productCsvEntryParser());
+    public ProductCsvFileReader csvFileProductProvider(Environment environment) {
+        return new ProductCsvFileReader(environment, fileReaderProvider(), productCsvEntryParser());
     }
 
     @Bean
     @Autowired
     public ProductCatalogue productCatalogue(Environment environment) throws IOException {
-        List<Product> products = csvFileProductProvider(environment).parse();
+        List<Product> products = csvFileProductProvider(environment).read();
         return new StaticProductRepository(products);
     }
 
