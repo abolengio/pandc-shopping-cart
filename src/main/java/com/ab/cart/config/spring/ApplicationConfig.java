@@ -3,7 +3,6 @@ package com.ab.cart.config.spring;
 import com.ab.cart.domain.Clock;
 import com.ab.cart.domain.EffectivePriceProductProvider;
 import com.ab.cart.domain.PricingStrategy;
-import com.ab.cart.domain.Product;
 import com.ab.cart.domain.ReadableShoppingCartProvider;
 import com.ab.cart.domain.converters.CartItemToExpandedCartItemTransformer;
 import com.ab.cart.domain.productcatalogue.ProductCatalogue;
@@ -11,7 +10,7 @@ import com.ab.cart.repository.ShoppingCartItemsRepository;
 import com.ab.cart.repository.impl.ProductCsvEntryParser;
 import com.ab.cart.repository.impl.ProductCsvFileReader;
 import com.ab.cart.repository.impl.ProductRebateTimeFrameParser;
-import com.ab.cart.repository.impl.StaticProductRepository;
+import com.ab.cart.repository.impl.SimpleProductRepository;
 import com.ab.cart.repository.impl.eventsourced.AggregatingShoppingCartFactory;
 import com.ab.cart.repository.impl.eventsourced.EventSourcingFileShoppingCartReaderWriter;
 import com.ab.cart.repository.impl.eventsourced.EventSourcingShoppingCartItemsRepository;
@@ -25,7 +24,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 
 import java.io.IOException;
-import java.util.List;
 
 @Configuration
 public class ApplicationConfig {
@@ -100,10 +98,8 @@ public class ApplicationConfig {
     }
 
     @Bean
-    @Autowired
-    public ProductCatalogue productCatalogue(Environment environment) throws IOException {
-        List<Product> products = csvFileProductProvider(environment).read();
-        return new StaticProductRepository(products);
+    public ProductCatalogue productCatalogue() throws IOException {
+        return new SimpleProductRepository(csvFileProductProvider(environment));
     }
 
 }

@@ -3,6 +3,7 @@ package com.ab.cart.integration;
 import com.ab.cart.config.spring.ApplicationConfig;
 import com.ab.cart.config.spring.IntegrationTestPropertiesConfig;
 import com.ab.cart.config.spring.WebMvcConfig;
+import com.ab.cart.repository.impl.ProductCsvFileReader;
 import com.ab.cart.repository.impl.eventsourced.EventSourcingFileShoppingCartReaderWriter;
 import com.ab.cart.rest.controller.UriFor;
 import com.ab.cart.utils.Preferences;
@@ -11,7 +12,6 @@ import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,12 +54,12 @@ public class ShoppingCartIntegrationTest {
 
     @Autowired
     private Environment environment;
-/*
+
     private void givenProductFileWithContent(String content) throws IOException {
-        String productFilePath = environment.getProperty(CsvFileProductProvider.PRODUCT_CSV_FILE_PATH_PROPERTY);
+        String productFilePath = environment.getProperty(ProductCsvFileReader.PRODUCT_CSV_FILE_PATH_PROPERTY);
         FileUtils.writeStringToFile(new File(productFilePath), content, Charset.forName("UTF-8"));
     }
-  */
+
     private void givenShoppingCartFileWithContent(String content) throws IOException {
         String shoppingCartFilePath = environment.getProperty(EventSourcingFileShoppingCartReaderWriter.SHOPPING_CART_FILE_PATH_PROPERTY);
         FileUtils.writeStringToFile(new File(shoppingCartFilePath), content, Charset.forName("UTF-8"));
@@ -77,6 +77,8 @@ public class ShoppingCartIntegrationTest {
 
     @Test
     public void shouldReturnCartContent() throws Exception{
+        givenProductFileWithContent("1001,test dress,29.99,2014-02-28:15:00:00-2014-02-28:16:00:00\n" +
+                "1002,Test Green Shirt,9.90,\n" );
 
         givenShoppingCartFileWithContent(   "ADD,1001,2\n" +
                                             "ADD,1002,3\n" +
@@ -90,7 +92,7 @@ public class ShoppingCartIntegrationTest {
                 .andExpect(jsonPath("$.items", hasSize(2)))
                 .andExpect(jsonPath("$.items[0].productId", is("1001")))
                 .andExpect(jsonPath("$.items[0].quantity", is(4)))
-                .andExpect(jsonPath("$.items[0].product.name", is("test dress with pink flowers")))
+                .andExpect(jsonPath("$.items[0].product.name", is("test dress")))
                 .andExpect(jsonPath("$.items[1].productId", is("1002")))
                 .andExpect(jsonPath("$.items[1].quantity", is(3)))
                 .andExpect(jsonPath("$.items[1].product.name", is("Test Green Shirt")))
@@ -100,6 +102,8 @@ public class ShoppingCartIntegrationTest {
 
     @Test
     public void shouldAddItem() throws Exception{
+        givenProductFileWithContent("1001,test dress with pink flowers,29.99,\n" +
+                "1002,Test Green Shirt,9.90,\n");
         givenShoppingCartFileWithContent("ADD,1001,1\n");
 
         mockMvc.perform(post(UriFor.cartItems)
@@ -115,7 +119,8 @@ public class ShoppingCartIntegrationTest {
 
     @Test
     public void shouldRemoveItem() throws Exception{
-
+        givenProductFileWithContent("1001,test dress with pink flowers,29.99,\n" +
+                "1002,Test Green Shirt,9.90,\n" );
         givenShoppingCartFileWithContent("ADD,1001,1\n" +
                 "ADD,1002,2\n");
 
@@ -148,21 +153,20 @@ public class ShoppingCartIntegrationTest {
     }
 
     @Test
-    @Ignore
     public void shouldUseSystemTimeToApplyRebate() throws Exception{
 
-        DateTimeFormatter formatter = DateTimeFormat.forPattern("yyyy-MM-dd'-'HH:mm:ss").withZone(Preferences.SYSTEM_TIME_ZONE);
+        DateTimeFormatter formatter = DateTimeFormat.forPattern("yyyy-MM-dd:HH:mm:ss").withZone(Preferences.SYSTEM_TIME_ZONE);
         DateTime currentTime = new DateTime();
         String inclusiveTimeFrameStart = formatter.print(currentTime.minusMinutes(15));
         String inclusiveTimeFrameEnd = formatter.print(currentTime.plusMinutes(15));
         String pastTimeFrameStart = formatter.print(currentTime.minusMinutes(20));
-        String pastTimeFrameEnd = formatter.print(currentTime.plusMinutes(1));
-     /*
+        String pastTimeFrameEnd = formatter.print(currentTime.minusMinutes(1));
+
         givenProductFileWithContent(
                 "1001,product which currently is subject to rebate,100," + inclusiveTimeFrameStart + "-" + inclusiveTimeFrameEnd+"\n" +
                 "1002,product which is NOT subject to rebate anymore,200," + pastTimeFrameStart + "-" + pastTimeFrameEnd+"\n"
         );
-     */
+
         givenShoppingCartFileWithContent("ADD,1001,1\n" +
                 "ADD,1002,1\n");
 
@@ -170,10 +174,10 @@ public class ShoppingCartIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(APPLICATION_JSON_UTF8))
                 .andExpect(jsonPath("$.items[0].productId", is("1001")))
-                .andExpect(jsonPath("$.items[0].subTotal.amount", is("80")))
+                .andExpect(jsonPath("$.items[0].subTotal.amount", is(80.0)))
 
                 .andExpect(jsonPath("$.items[1].productId", is("1002")))
-                .andExpect(jsonPath("$.items[1].subTotal.amount", is("200")))
+                .andExpect(jsonPath("$.items[1].subTotal.amount", is(200.0)))
         ;
     }
 

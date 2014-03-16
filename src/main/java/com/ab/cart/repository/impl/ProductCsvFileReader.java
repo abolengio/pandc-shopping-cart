@@ -1,6 +1,7 @@
 package com.ab.cart.repository.impl;
 
 import com.ab.cart.domain.Product;
+import com.ab.cart.repository.ProductListReader;
 import com.ab.cart.utils.FileReaderFactory;
 import com.googlecode.jcsv.CSVStrategy;
 import com.googlecode.jcsv.reader.CSVReader;
@@ -11,7 +12,7 @@ import java.io.IOException;
 import java.io.Reader;
 import java.util.List;
 
-public class ProductCsvFileReader {
+public class ProductCsvFileReader implements ProductListReader {
 
     public static final String PRODUCT_CSV_FILE_PATH_PROPERTY = "product.catalogue.file";
     private final Environment environment;
@@ -27,7 +28,8 @@ public class ProductCsvFileReader {
         this.productCsvEntryParser = productCsvEntryParser;
     }
 
-    public List<Product> read() throws IOException {
+    @Override
+    public List<Product> read() {
         String productCsvFilePath = environment.getProperty(PRODUCT_CSV_FILE_PATH_PROPERTY);
         Reader reader = null;
         try {
@@ -35,6 +37,8 @@ public class ProductCsvFileReader {
             CSVReader<Product> csvPersonReader = new CSVReaderBuilder<Product>(reader).strategy(CSVStrategy.UK_DEFAULT)
                     .entryParser(productCsvEntryParser).build();
             return csvPersonReader.readAll();
+        } catch (Exception exc) {
+            throw new RuntimeException(exc);
         } finally {
             if (reader != null)
                 try {

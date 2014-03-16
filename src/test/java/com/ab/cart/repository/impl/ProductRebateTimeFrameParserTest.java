@@ -13,8 +13,8 @@ public class ProductRebateTimeFrameParserTest {
     public void shouldParseTimeFrame() {
         ProductRebateTimeFrameParser parser = new ProductRebateTimeFrameParser();
         ReadableInterval interval = parser.parse("2014-02-28:15:00:00-2014-02-28:16:07:10");
-        assertThat(interval.getStart(), is(DateTime.parse("2014-02-28T15:00:00")));
-        assertThat(interval.getEnd(), is(DateTime.parse("2014-02-28T16:07:10")));
+        assertThat(interval.getStart().getMillis(), is(DateTime.parse("2014-02-28T15:00:00.000+01:00").getMillis()));
+        assertThat(interval.getEnd().getMillis(), is(DateTime.parse("2014-02-28T16:07:10.000+01:00").getMillis()));
     }
 
     @Test(expected = IllegalArgumentException.class)

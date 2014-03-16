@@ -178,8 +178,8 @@ public class ShoppingCartControllerTest {
                 .andExpect(jsonPath("$.items[1].product.price.currency", is("EUR")))
                 .andExpect(jsonPath("$.items[1].product.effectivePrice.amount", is(3.70)))
                 .andExpect(jsonPath("$.items[1].product.effectivePrice.currency", is("EUR")))
-                .andExpect(jsonPath("$.items[1].product.rebateTimeFrame.start", is("2014-04-01T12:37:00.000Z")))
-                .andExpect(jsonPath("$.items[1].product.rebateTimeFrame.end", is("2014-05-01T12:37:00.000Z")))
+                .andExpect(jsonPath("$.items[1].product.rebateTimeFrame.start", is("2014-04-01T12:37:00.000+01:00")))
+                .andExpect(jsonPath("$.items[1].product.rebateTimeFrame.end", is("2014-05-01T12:37:00.000+01:00")))
                 .andExpect(jsonPath("$.subTotal.amount", is(23.89)))
                 .andExpect(jsonPath("$.subTotal.currency", is("EUR")))
         ;
