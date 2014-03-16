@@ -21,6 +21,7 @@ import com.ab.cart.utils.FileWriterFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Scope;
 import org.springframework.core.env.Environment;
 
 import java.io.IOException;
@@ -46,6 +47,7 @@ public class ApplicationConfig {
     }
 
     @Bean
+    @Scope(value="singleton")
     @Autowired
     public EventSourcingFileShoppingCartReaderWriter eventSourcingFileShoppingCartReaderWriter() {
         return new EventSourcingFileShoppingCartReaderWriter(environment,

@@ -8,8 +8,9 @@ import org.springframework.core.env.Environment;
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 
-//todo should be singleton and fully synchronised
-//todo add assumption about hosting on one node only
+/**
+ * provides synchronised access to file containing content of the shopping basket
+ */
 public class EventSourcingFileShoppingCartReaderWriter implements WritableShoppingCart, ShoppingCartEventSource {
 
     public static final String SHOPPING_CART_FILE_PATH_PROPERTY = "shopping.cart.file";
@@ -26,26 +27,25 @@ public class EventSourcingFileShoppingCartReaderWriter implements WritableShoppi
         this.fileLineWriter = fileLineWriter;
         this.commandSerializerDeserializer = commandSerializerDeserializer;
         filePath = environment.getProperty(SHOPPING_CART_FILE_PATH_PROPERTY);
-        //todo check file access here ?
     }
 
     @Override
-    public void add(String productId, int quantity) {
+    public synchronized void add(String productId, int quantity) {
         fileLineWriter.addLine(commandSerializerDeserializer.addCommandFor(productId, quantity));
     }
 
     @Override
-    public void remove(String productId) {
+    public synchronized void remove(String productId) {
         fileLineWriter.addLine(commandSerializerDeserializer.removeCommandFor(productId));
     }
 
     @Override
-    public void updateQuantity(String productId, int quantity) {
+    public synchronized void updateQuantity(String productId, int quantity) {
         fileLineWriter.addLine(commandSerializerDeserializer.updateQuantityCommandFor(productId, quantity));
     }
 
     @Override
-    public void readInto(WritableShoppingCart writableShoppingCart) {
+    public synchronized void readInto(WritableShoppingCart writableShoppingCart) {
         BufferedReader fileReader = null;
         try {
             fileReader = new BufferedReader(fileReaderFactory.getFileReader(filePath));
