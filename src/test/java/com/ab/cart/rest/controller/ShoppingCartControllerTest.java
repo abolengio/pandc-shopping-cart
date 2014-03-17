@@ -3,6 +3,7 @@ package com.ab.cart.rest.controller;
 import com.ab.cart.config.spring.TestApplicationConfig;
 import com.ab.cart.config.spring.WebMvcConfig;
 import com.ab.cart.domain.EffectivePriceProduct;
+import com.ab.cart.domain.ProductNotInShoppingCartException;
 import com.ab.cart.domain.ReadableShoppingCartProvider;
 import com.ab.cart.domain.WritableShoppingCart;
 import org.junit.Before;
@@ -260,6 +261,20 @@ public class ShoppingCartControllerTest {
                 .andExpect(jsonPath("$.product.price.currency", is("EUR")))
                 .andExpect(jsonPath("$.product.rebateTimeFrame.start", is("2014-04-01T12:37:00.000+01:00")))
                 .andExpect(jsonPath("$.product.rebateTimeFrame.end", is("2014-05-01T12:37:00.000+01:00")))
+                ;
+
+    }
+
+    @Test
+    public void shouldReturnNotFoundResponseIfProductIsNotInTheCart() throws Exception{
+
+        when(mockReadableShoppingCartProvider.getShoppingCartItem("product1-id")).thenThrow(new ProductNotInShoppingCartException("product1-id"));
+
+        mockMvc.perform(get(uriForCartItemWithProductId("product1-id")))
+                .andExpect(status().is(404))
+                .andExpect(content().contentType(APPLICATION_JSON_UTF8))
+                .andExpect(jsonPath("$.status", is(404)))
+                .andExpect(jsonPath("$.message", is("Product with id 'product1-id' is not in the shopping cart")))
                 ;
 
     }
