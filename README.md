@@ -2,13 +2,17 @@
 
 To build the project you will need Java 7 and maven 3.
 
+To execute automated tests:
+
+    mvn clean test
+
 To start the service:
 
     mvn jetty:run
 
-To execute automated tests:
+The product.csv which is used by the service as a product catalogue is located in the root folder of the project.
 
-    mvn clean test
+The content of the shopping cart is stored in the file shopping.cart.csv which is also located in the root folder of the project. Feel free to remove the shopping cart file to reset the state of the shopping cart.
 
 ## Usage
 

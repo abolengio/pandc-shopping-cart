@@ -4,6 +4,6 @@
     <title>Shopping Cart Service</title>
 </head>
 <body>
-<h1>Shopping Cart Service</h1>
+<a href="v1/cart">See Content Of Your Shopping Cart</a>
 </body>
 </html>
