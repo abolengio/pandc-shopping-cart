@@ -17,7 +17,7 @@ public class ShoppingCartResource extends BaseResource {
     private ReadableShoppingCart readableShoppingCart;
 
     private static Link selfLink = new Link(UriFor.cart, "self", RequestMethod.GET);
-    private static Link addLink = new Link(UriFor.cartItems, "/shopping-cart/add-item", RequestMethod.POST);
+    private static Link addLink = new Link(UriFor.cartItems, "add-item", RequestMethod.POST);
 
     public ShoppingCartResource(ReadableShoppingCart readableShoppingCart) {
         super(selfLink, addLink);

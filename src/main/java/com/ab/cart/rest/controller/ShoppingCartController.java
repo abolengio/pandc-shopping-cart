@@ -1,8 +1,10 @@
 package com.ab.cart.rest.controller;
 
+import com.ab.cart.domain.ExpandedCartItem;
 import com.ab.cart.domain.ReadableShoppingCart;
 import com.ab.cart.domain.ReadableShoppingCartProvider;
 import com.ab.cart.domain.WritableShoppingCart;
+import com.ab.cart.rest.resource.ShoppingCartItemResource;
 import com.ab.cart.rest.resource.ShoppingCartResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -63,6 +65,14 @@ public class ShoppingCartController {
         return new RedirectView(UriFor.cart, true, false);
     }
 
+
+    @RequestMapping(value = UriFor.cartItem, method = RequestMethod.GET)
+    @ResponseBody
+    public ShoppingCartItemResource getCartItem(@PathVariable String productId) {
+        ExpandedCartItem shoppingCartItem = readableShoppingCartProvider.getShoppingCartItem(productId);
+        return new ShoppingCartItemResource(shoppingCartItem);
+        //todo handle not existing item
+    }
 
     @RequestMapping(value = UriFor.cartItem, method = RequestMethod.DELETE)
     @ResponseBody

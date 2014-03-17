@@ -101,6 +101,24 @@ public class ShoppingCartIntegrationTest {
     }
 
     @Test
+    public void shouldReturnIndividualCartItem() throws Exception{
+        givenProductFileWithContent("1001,test dress,29.99,\n" +
+                "1002,Test Green Shirt,9.90,\n" );
+
+        givenShoppingCartFileWithContent(   "ADD,1002,1\n" +
+                                            "ADD,1001,3\n" +
+                                            "ADD,1002,1\n");
+
+        mockMvc.perform(get(uriForCartItemWithProductId("1002")))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(APPLICATION_JSON_UTF8))
+                .andExpect(jsonPath("$.productId", is("1002")))
+                .andExpect(jsonPath("$.quantity", is(2)))
+                .andExpect(jsonPath("$.subTotal.amount", is(19.8)))
+                .andExpect(jsonPath("$.subTotal.currency", is("EUR")));
+    }
+
+    @Test
     public void shouldAddItem() throws Exception{
         givenProductFileWithContent("1001,test dress with pink flowers,29.99,\n" +
                 "1002,Test Green Shirt,9.90,\n");

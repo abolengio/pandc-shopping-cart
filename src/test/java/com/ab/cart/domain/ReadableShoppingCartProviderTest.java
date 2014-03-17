@@ -92,4 +92,37 @@ public class ReadableShoppingCartProviderTest {
         assertThat(readableShoppingCart.getSubTotal(), is(Money.of(CurrencyUnit.EUR, 45)));
     }
 
+    @Test
+    public void shouldReturnSingleCartItem() {
+        //given
+        CartItem cartItem1 = new CartItem("1234", 7);
+        CartItem cartItem2 = new CartItem("567", 3);
+        CartItem cartItem3 = new CartItem("890", 1);
+        List<CartItem> items = new ArrayList<>();
+        items.add(cartItem1);
+        items.add(cartItem2);
+        items.add(cartItem3);
+        when(shoppingCartItemsRepository.getShoppingCartItems()).thenReturn(items);
+        ExpandedCartItem expandedCartItem2 = mock(ExpandedCartItem.class);
+        when(expandedCartItem2.getSubTotal()).thenReturn(Money.of(CurrencyUnit.EUR, 10));
+        when(cartItemToExpandedCartItemTransformer.apply(cartItem2)).thenReturn(expandedCartItem2);
+        //when
+        ReadableShoppingCartProvider cartProvider = new ReadableShoppingCartProvider(shoppingCartItemsRepository, cartItemToExpandedCartItemTransformer);
+        ExpandedCartItem shoppingCartItem = cartProvider.getShoppingCartItem("567");
+        //then
+        assertThat(shoppingCartItem, is(expandedCartItem2));
+    }
+
+    @Test(expected = ProductNotInShoppingCartException.class)
+    public void shouldThrowExceptionIfRequestedProductNotInTheCart() {
+        //given
+        CartItem cartItem1 = new CartItem("1234", 7);
+        List<CartItem> items = new ArrayList<>();
+        items.add(cartItem1);
+        when(shoppingCartItemsRepository.getShoppingCartItems()).thenReturn(items);
+        //when
+        ReadableShoppingCartProvider cartProvider = new ReadableShoppingCartProvider(shoppingCartItemsRepository, cartItemToExpandedCartItemTransformer);
+        cartProvider.getShoppingCartItem("567");
+    }
+
 }

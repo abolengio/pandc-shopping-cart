@@ -6,7 +6,8 @@ import com.ab.cart.repository.ShoppingCartItemsRepository;
 import java.util.List;
 
 /**
- * simple implementation of ShoppingCartRepository which recreates the whole shopping cart each time (which may not be efficient)
+ * simple implementation of ShoppingCartRepository which recreates the whole shopping cart each time from the underlying source
+ * (which may or may not be efficient depending on underlying source)
  */
 public class EventSourcingShoppingCartItemsRepository implements ShoppingCartItemsRepository {
 
@@ -15,7 +16,6 @@ public class EventSourcingShoppingCartItemsRepository implements ShoppingCartIte
 
     public EventSourcingShoppingCartItemsRepository(AggregatingShoppingCartFactory aggregatingShoppingCartFactory, ShoppingCartEventSource shoppingCartEventSource) {
         this.aggregatingShoppingCartFactory = aggregatingShoppingCartFactory;
-
         this.shoppingCartEventSource = shoppingCartEventSource;
     }
 
