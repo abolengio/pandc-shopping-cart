@@ -31,6 +31,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -279,6 +280,32 @@ public class ShoppingCartControllerTest {
 
     }
 
+    @Test
+    public void shouldUpdateQuantity() throws Exception{
+        EffectivePriceProduct product = productWithId("product1-id").name("single product name").price(8.90).effectivePrice(3.80)
+                .rebateTimeframe().start("2014-04-01T12:37:00").end("2014-05-01T12:37:00").build();
+        when(mockReadableShoppingCartProvider.getShoppingCartItem("product1-id")).thenReturn(
+                cartItem().with(product).quantity(2).build()
+        );
+        mockMvc.perform(put(uriForCartItemWithProductId("product1-id"))
+                .contentType(APPLICATION_JSON_UTF8)
+                .content("{\"productId\":\"product1-id\"," +
+                        "\"quantity\":7}"))
+                .andExpect(status().is(200))
+                .andExpect(jsonPath("$.productId", is("product1-id")))
+                .andExpect(jsonPath("$.quantity", is(2)))
+                .andExpect(jsonPath("$.subTotal.amount", is(7.60)))
+                .andExpect(jsonPath("$.subTotal.currency", is("EUR")))
+                .andExpect(jsonPath("$.product.effectivePrice.amount", is(3.80)))
+                .andExpect(jsonPath("$.product.effectivePrice.currency", is("EUR")))
+                .andExpect(jsonPath("$.product.price.amount", is(8.90)))
+                .andExpect(jsonPath("$.product.price.currency", is("EUR")))
+                .andExpect(jsonPath("$.product.rebateTimeFrame.start", is("2014-04-01T12:37:00.000+01:00")))
+                .andExpect(jsonPath("$.product.rebateTimeFrame.end", is("2014-05-01T12:37:00.000+01:00")))
+        ;
+
+        verify(writableShoppingCart).updateQuantity("product1-id", 7);
+    }
 
     //todo test validation
     //todo test update and delete

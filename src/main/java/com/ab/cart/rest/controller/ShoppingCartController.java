@@ -96,13 +96,10 @@ public class ShoppingCartController {
 
     @RequestMapping(value = UriFor.cartItem, method = RequestMethod.PUT)
     @ResponseBody
-    public ShoppingCartResource updateQuantity(@PathVariable String productId, @RequestBody CartItemParameter cartItem) {
+    public ShoppingCartItemResource updateQuantity(@PathVariable String productId, @RequestBody CartItemParameter cartItem) {
         //todo validate that parameters match
         writableShoppingCart.updateQuantity(cartItem.getProductId(), cartItem.getQuantity());
-
-        //todo what is the response code ?
-        ReadableShoppingCart readableShoppingCart = readableShoppingCartProvider.getReadableShoppingCart();
-        return new ShoppingCartResource(readableShoppingCart); //todo refactor to avoid duplication
-    }
+        ExpandedCartItem shoppingCartItem = readableShoppingCartProvider.getShoppingCartItem(productId);
+        return new ShoppingCartItemResource(shoppingCartItem);    }
 
 }
