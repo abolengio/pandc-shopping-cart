@@ -218,6 +218,33 @@ public class ShoppingCartIntegrationTest {
     }
 
     @Test
+    public void shouldReturnValidationErrorsWhenUpdateQuantityForProductWhichDoesNotExist() throws Exception{
+        givenProductFileWithContent("1001,test dress with pink flowers,30.99,\n" +
+                "1002,Test Green Shirt,19.90,\n" );
+
+        givenShoppingCartFileWithContent("ADD,1001,1\n" +
+                                         "ADD,1002,7\n"
+        );
+
+        mockMvc.perform(put(uriForCartItemWithProductId("1010"))
+                .contentType(APPLICATION_JSON_UTF8)
+                .content("{" +
+                            "\"productId\":\"1010\"," +
+                            "\"quantity\":2" +
+                         "}"))
+                .andExpect(status().is(400))
+                .andExpect(content().contentType(APPLICATION_JSON_UTF8))
+                .andExpect(jsonPath("$.message", is("Validation failed")))
+                .andExpect(jsonPath("$.errors", hasSize(1)))
+                .andExpect(jsonPath("$.errors[0].field", is("productId")))
+                .andExpect(jsonPath("$.errors[0].message", is("Product with id '1010' does not exist in the product catalogue")))
+        ;
+
+        assertThat(shoppingCartFileContent(), is(   "ADD,1001,1\n" +
+                                                    "ADD,1002,7\n"));
+    }
+
+    @Test
     public void shouldCreateItemWhenUpdateQuantityWhenItemIsNotInTheCart() throws Exception{
         givenProductFileWithContent("1001,test dress with pink flowers,30.99,\n" +
                                     "1002,Test Green Shirt,19.90,\n" );
