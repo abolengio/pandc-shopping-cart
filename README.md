@@ -18,7 +18,7 @@ The content of the shopping cart is stored in the file shopping.cart.csv which i
 
 To see the content of the cart please start the service and go to
 
-[http://localhost:8080/v1/cart]
+[http://localhost:8080/v1/cart](http://localhost:8080/v1/cart)
 
 How to interact with the service further should be clear from the [HATEOAS](http://en.wikipedia.org/wiki/HATEOAS) links.
 
