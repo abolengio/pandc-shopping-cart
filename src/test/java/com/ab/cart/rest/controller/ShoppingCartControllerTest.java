@@ -234,8 +234,6 @@ public class ShoppingCartControllerTest {
         ;
     }
 
-    //todo test case when Content Type is NOT supplied in PUT and POST request
-
     @Test
     public void shouldAddItem() throws Exception{
 
@@ -266,6 +264,30 @@ public class ShoppingCartControllerTest {
                 ;
 
         verify(writableShoppingCart).add("product1-id", 2);
+    }
+
+    @Test
+    public void shouldReturnErrorIfContentTypeIsNotSetOnAddItemRequest() throws Exception{
+
+        mockMvc.perform(post(UriFor.cartItems)
+                                .content("{\"productId\":\"product1-id\"," +
+                                        "\"quantity\":2}"))
+                .andExpect(status().is(415))
+                ;
+
+        verifyZeroInteractions(writableShoppingCart);
+    }
+
+    @Test
+    public void shouldReturnErrorIfContentTypeIsNotSetOnUpdateQuantityRequest() throws Exception{
+
+        mockMvc.perform(put(uriForCartItemWithProductId("product1-id"))
+                                .content("{\"productId\":\"product1-id\"," +
+                                        "\"quantity\":2}"))
+                .andExpect(status().is(415))
+                ;
+
+        verifyZeroInteractions(writableShoppingCart);
     }
 
     @Test

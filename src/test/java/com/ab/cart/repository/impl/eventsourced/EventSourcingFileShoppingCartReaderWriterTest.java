@@ -6,6 +6,7 @@ import com.ab.cart.utils.FileReaderFactory;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.mock.env.MockEnvironment;
@@ -17,10 +18,12 @@ import java.io.StringReader;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.collection.IsIterableContainingInOrder.contains;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
@@ -106,16 +109,17 @@ public class EventSourcingFileShoppingCartReaderWriterTest {
         verify(commandSerializerDeserializer).read("one line content",writableShoppingCart);
     }
 
-    //todo test the order ? - actually dont and remove the order from other places, but add time when command was recorded
-
     @Test
-    public void shouldReadFileWithMultipleLines() throws IOException {
+    public void shouldReadFileWithMultipleLinesAndParseThemInOrder() throws IOException {
         givenShoppingCartFileWithContent("first line content\nsecond line content\nthird line content");
         EventSourcingFileShoppingCartReaderWriter reader = new EventSourcingFileShoppingCartReaderWriter(environment, fileReaderFactory,fileLineWriter,commandSerializerDeserializer);
         reader.readInto(writableShoppingCart);
-        verify(commandSerializerDeserializer).read("first line content",writableShoppingCart);
-        verify(commandSerializerDeserializer).read("second line content",writableShoppingCart);
-        verify(commandSerializerDeserializer).read("third line content",writableShoppingCart);
+
+        ArgumentCaptor<String> lineCaptor = ArgumentCaptor.forClass( String.class );
+        ArgumentCaptor<WritableShoppingCart> cartCaptor = ArgumentCaptor.forClass( WritableShoppingCart.class );
+        verify( commandSerializerDeserializer, times(3)).read(lineCaptor.capture(), cartCaptor.capture());
+        assertThat(lineCaptor.getAllValues(), contains("first line content","second line content","third line content"));
+        assertThat(cartCaptor.getValue(), is(writableShoppingCart));
     }
 
     @Test

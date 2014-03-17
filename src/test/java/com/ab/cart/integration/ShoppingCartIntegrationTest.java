@@ -67,7 +67,7 @@ public class ShoppingCartIntegrationTest {
 
     private String shoppingCartFileContent() throws IOException {
         String shoppingCartFilePath = environment.getProperty(EventSourcingFileShoppingCartReaderWriter.SHOPPING_CART_FILE_PATH_PROPERTY);
-        return FileUtils.readFileToString(new File(shoppingCartFilePath), Charset.forName("UTF-8"));     //todo make sure file is actually written in UTF-8
+        return FileUtils.readFileToString(new File(shoppingCartFilePath), Charset.forName("UTF-8"));
     }
 
     @Before
