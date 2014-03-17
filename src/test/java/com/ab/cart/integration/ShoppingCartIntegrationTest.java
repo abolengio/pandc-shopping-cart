@@ -154,11 +154,36 @@ public class ShoppingCartIntegrationTest {
         mockMvc.perform(delete(uriForCartItemWithProductId("1001"))
                 )
                 .andExpect(status().isOk())
+                .andExpect(content().contentType(APPLICATION_JSON_UTF8))
+                .andExpect(jsonPath("$.links", hasSize(1)))
+                .andExpect(jsonPath("$.links[0].href", is(UriFor.cart)))
+                .andExpect(jsonPath("$.links[0].rel", is("container")))
+                .andExpect(jsonPath("$.links[0].method", is("GET")))
         ;
 
         assertThat(shoppingCartFileContent(), is(   "ADD,1001,1\n" +
                                                     "ADD,1002,2\n" +
                                                     "REMOVE,1001\n"));
+    }
+
+    @Test
+    public void shouldReturnSuccessWhenDeletingItemWhichDoesNotExistInTheCart() throws Exception{
+        givenProductFileWithContent("1001,test dress with pink flowers,29.99,\n" +
+                "1002,Test Green Shirt,9.90,\n" );
+        givenShoppingCartFileWithContent("ADD,1001,1\n");
+
+        mockMvc.perform(delete(uriForCartItemWithProductId("1002"))
+                )
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(APPLICATION_JSON_UTF8))
+                .andExpect(jsonPath("$.links", hasSize(1)))
+                .andExpect(jsonPath("$.links[0].href", is(UriFor.cart)))
+                .andExpect(jsonPath("$.links[0].rel", is("container")))
+                .andExpect(jsonPath("$.links[0].method", is("GET")))
+        ;
+
+        assertThat(shoppingCartFileContent(), is(   "ADD,1001,1\n" +
+                                                    "REMOVE,1002\n"));
     }
 
     @Test

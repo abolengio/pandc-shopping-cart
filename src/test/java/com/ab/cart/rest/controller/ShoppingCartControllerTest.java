@@ -29,6 +29,7 @@ import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -223,7 +224,7 @@ public class ShoppingCartControllerTest {
         ;
     }
 
-    //todo test case when Content Type is NOT supplied in PUT request
+    //todo test case when Content Type is NOT supplied in PUT and POST request
 
     @Test
     public void shouldAddItem() throws Exception{
@@ -309,6 +310,7 @@ public class ShoppingCartControllerTest {
                 .content("{\"productId\":\"product1-id\"," +
                         "\"quantity\":7}"))
                 .andExpect(status().is(200))
+                .andExpect(content().contentType(APPLICATION_JSON_UTF8))
                 .andExpect(jsonPath("$.productId", is("product1-id")))
                 .andExpect(jsonPath("$.quantity", is(2)))
                 .andExpect(jsonPath("$.subTotal.amount", is(7.60)))
@@ -324,8 +326,22 @@ public class ShoppingCartControllerTest {
         verify(writableShoppingCart).updateQuantity("product1-id", 7);
     }
 
+    @Test
+    public void shouldRemoveItem() throws Exception{
+
+        mockMvc.perform(delete(uriForCartItemWithProductId("product1-id")))
+                .andExpect(status().is(200))
+                .andExpect(content().contentType(APPLICATION_JSON_UTF8))
+                .andExpect(jsonPath("$.links", hasSize(1)))
+                .andExpect(jsonPath("$.links[0].href", is(UriFor.cart)))
+                .andExpect(jsonPath("$.links[0].rel", is("container")))
+                .andExpect(jsonPath("$.links[0].method", is("GET")))
+        ;
+
+        verify(writableShoppingCart).remove("product1-id");
+    }
+
     //todo test validation
-    //todo test update and delete
     private String uriForCartItemWithProductId(String productId) {
         return replace(UriFor.cartItem, "{productId}" , productId);
     }

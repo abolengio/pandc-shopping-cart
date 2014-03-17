@@ -5,6 +5,7 @@ import com.ab.cart.domain.ProductNotInShoppingCartException;
 import com.ab.cart.domain.ReadableShoppingCart;
 import com.ab.cart.domain.ReadableShoppingCartProvider;
 import com.ab.cart.domain.WritableShoppingCart;
+import com.ab.cart.rest.resource.DeletedItemResource;
 import com.ab.cart.rest.resource.RestError;
 import com.ab.cart.rest.resource.ShoppingCartItemResource;
 import com.ab.cart.rest.resource.ShoppingCartResource;
@@ -86,12 +87,10 @@ public class ShoppingCartController {
 
     @RequestMapping(value = UriFor.cartItem, method = RequestMethod.DELETE)
     @ResponseBody
-    public ShoppingCartResource removeItem(@PathVariable String productId) {
+    public DeletedItemResource removeItem(@PathVariable String productId) {
+        //todo handle product does not exist - HOW ???
         writableShoppingCart.remove(productId);
-
-        //todo what is the response code ?
-        ReadableShoppingCart readableShoppingCart = readableShoppingCartProvider.getReadableShoppingCart();
-        return new ShoppingCartResource(readableShoppingCart); //todo refactor to avoid duplication
+        return new DeletedItemResource();
     }
 
     @RequestMapping(value = UriFor.cartItem, method = RequestMethod.PUT)
