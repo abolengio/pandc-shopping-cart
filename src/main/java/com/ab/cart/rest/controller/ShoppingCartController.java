@@ -9,16 +9,24 @@ import com.ab.cart.rest.resource.DeletedItemResource;
 import com.ab.cart.rest.resource.RestError;
 import com.ab.cart.rest.resource.ShoppingCartItemResource;
 import com.ab.cart.rest.resource.ShoppingCartResource;
+import com.ab.cart.rest.resource.ValidationError;
+import com.ab.cart.rest.validator.CartItemValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
+
+import javax.validation.Valid;
 
 @Controller
 public class ShoppingCartController {
@@ -32,6 +40,11 @@ public class ShoppingCartController {
         this.writableShoppingCart = writableShoppingCart;
     }
 
+    @InitBinder
+    protected void initBinder(WebDataBinder binder) {
+        binder.setValidator(new CartItemValidator());  //todo inject
+    }
+
     @RequestMapping(value = UriFor.cart, method = RequestMethod.GET)
     @ResponseBody
     public ShoppingCartResource shoppingCart() {
@@ -40,11 +53,11 @@ public class ShoppingCartController {
 
     }
 
-    @ExceptionHandler(Exception.class)
-    @ResponseStatus(value= HttpStatus.INTERNAL_SERVER_ERROR)
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    @ResponseStatus(value= HttpStatus.BAD_REQUEST)
     @ResponseBody
-    public RestError handleException(Exception exc) {
-        return new RestError(500, exc.getMessage());
+    public RestError handleMessageNotReadableException(Exception exc) {
+        return new RestError(400, exc.getMessage());
     }
 
     @ExceptionHandler(ProductNotInShoppingCartException.class)
@@ -54,27 +67,18 @@ public class ShoppingCartController {
         return new RestError(404, exc.getMessage());
     }
 
-    /*
     @ExceptionHandler
     @ResponseBody
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public RestError resolveBindingException ( MethodArgumentNotValidException methodArgumentNotValidException, Locale locale )
+    public ValidationError resolveBindingException (MethodArgumentNotValidException methodArgumentNotValidException)
     {
-        BindingResult bindingResult = methodArgumentNotValidException.getBindingResult();
-        return getRestError(bindingResult, locale);
+        return new ValidationError(400, "Validation failed", methodArgumentNotValidException.getBindingResult());
     }
-
-    @ResponseStatus(value=HttpStatus.NOT_FOUND, reason="No such Order")  // 404
-    public class OrderNotFoundException extends RuntimeException {
-        // ...
-    }
-
-     */
 
     @RequestMapping(value = UriFor.cartItems, method = RequestMethod.POST)
     @ResponseBody
-    public ShoppingCartItemResource addItem(@RequestBody CartItemParameter cartItem) {
-        //todo handle product does not exist and negative quantity
+    public ShoppingCartItemResource addItem(@RequestBody @Valid CartItemParameter cartItem) {
+        //todo handle product does not exist
         writableShoppingCart.add(cartItem.getProductId(), cartItem.getQuantity());
         return getCartItemResourceFor(cartItem.getProductId());
     }

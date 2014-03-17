@@ -28,6 +28,7 @@ import static org.apache.commons.lang.StringUtils.replace;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -255,6 +256,50 @@ public class ShoppingCartControllerTest {
                 ;
 
         verify(writableShoppingCart).add("product1-id", 2);
+    }
+
+    @Test
+    public void shouldReturnValidationErrorWhenTryingToAddItemWithNegativeQuantity() throws Exception{
+
+        EffectivePriceProduct product = productWithId("product1-id").name("product name").price(8.90).effectivePrice(3.80)
+                .build();
+        when(mockReadableShoppingCartProvider.getShoppingCartItem("product1-id")).thenReturn(
+                cartItem().with(product).quantity(2).build()
+        );
+
+        mockMvc.perform(post(UriFor.cartItems)
+                                .contentType(APPLICATION_JSON_UTF8)
+                                .content("{\"productId\":\"product1-id\"," +
+                                        "\"quantity\":-1}"))
+                .andExpect(status().is(400))
+                .andExpect(content().contentType(APPLICATION_JSON_UTF8))
+                .andExpect(jsonPath("$.message", is("Validation failed")))
+                .andExpect(jsonPath("$.errors", hasSize(1)))
+                .andExpect(jsonPath("$.errors[0].field", is("quantity")))
+                .andExpect(jsonPath("$.errors[0].message", is("Quantity should not be negative")))
+                ;
+
+        verifyZeroInteractions(writableShoppingCart);
+    }
+
+    @Test
+    public void shouldReturnValidationErrorWhenQuantityIsNotANumber() throws Exception{
+
+        EffectivePriceProduct product = productWithId("product1-id").name("product name").price(8.90).effectivePrice(3.80)
+                .build();
+        when(mockReadableShoppingCartProvider.getShoppingCartItem("product1-id")).thenReturn(
+                cartItem().with(product).quantity(2).build()
+        );
+
+        mockMvc.perform(post(UriFor.cartItems)
+                                .contentType(APPLICATION_JSON_UTF8)
+                                .content("{\"productId\":\"2\"," +
+                                        "\"quantity\":\"blah\"}"))
+                .andExpect(status().is(400))
+                .andExpect(content().contentType(APPLICATION_JSON_UTF8))
+                ;
+
+        verifyZeroInteractions(writableShoppingCart);
     }
 
     @Test
