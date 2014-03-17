@@ -191,6 +191,37 @@ public class ShoppingCartIntegrationTest {
         givenProductFileWithContent("1001,test dress with pink flowers,30.99,\n" +
                 "1002,Test Green Shirt,19.90,\n" );
 
+        givenShoppingCartFileWithContent("ADD,1001,1\n" +
+                                         "ADD,1002,7\n"
+        );
+
+        mockMvc.perform(put(uriForCartItemWithProductId("1002"))
+                .contentType(APPLICATION_JSON_UTF8)
+                .content("{" +
+                            "\"productId\":\"1002\"," +
+                            "\"quantity\":2" +
+                         "}"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(APPLICATION_JSON_UTF8))
+                .andExpect(jsonPath("$.productId", is("1002")))
+                .andExpect(jsonPath("$.quantity", is(2)))
+                .andExpect(jsonPath("$.subTotal.amount", is(39.80)))
+                .andExpect(jsonPath("$.product.effectivePrice.amount", is(19.90)))
+                .andExpect(jsonPath("$.product.effectivePrice.currency", is("EUR")))
+                .andExpect(jsonPath("$.product.price.amount", is(19.90)))
+                .andExpect(jsonPath("$.product.price.currency", is("EUR")))
+        ;
+
+        assertThat(shoppingCartFileContent(), is(   "ADD,1001,1\n" +
+                                                    "ADD,1002,7\n" +
+                                                    "UPDATE_QUANTITY,1002,2\n"));
+    }
+
+    @Test
+    public void shouldCreateItemWhenUpdateQuantityWhenItemIsNotInTheCart() throws Exception{
+        givenProductFileWithContent("1001,test dress with pink flowers,30.99,\n" +
+                                    "1002,Test Green Shirt,19.90,\n" );
+
         givenShoppingCartFileWithContent("ADD,1001,1\n");
 
         mockMvc.perform(put(uriForCartItemWithProductId("1002"))
@@ -246,5 +277,4 @@ public class ShoppingCartIntegrationTest {
     private String uriForCartItemWithProductId(String productId) {
         return replace(UriFor.cartItem, "{productId}" , productId);
     }
-    //todo deleting or updating item for product which is not in the cart
 }
