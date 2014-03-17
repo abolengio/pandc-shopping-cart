@@ -389,6 +389,7 @@ public class ShoppingCartControllerTest {
         when(mockReadableShoppingCartProvider.getShoppingCartItem("product1-id")).thenReturn(
                 cartItem().with(product).quantity(2).build()
         );
+        when(productCatalogue.getProduct("product1-id")).thenReturn(new Product("product1-id", "name", somePrice()));
         mockMvc.perform(put(uriForCartItemWithProductId("product1-id"))
                 .contentType(APPLICATION_JSON_UTF8)
                 .content("{\"productId\":\"product1-id\"," +
@@ -408,6 +409,59 @@ public class ShoppingCartControllerTest {
         ;
 
         verify(writableShoppingCart).updateQuantity("product1-id", 7);
+    }
+
+    @Test
+    public void shouldReturnValidationErrorWhenTryingToUpdateItemForNotExistingProductAndQuantityIsNegative() throws Exception{
+
+        EffectivePriceProduct product = productWithId("product1-id").name("product name").price(8.90).effectivePrice(3.80)
+                .build();
+        when(mockReadableShoppingCartProvider.getShoppingCartItem("product1-id")).thenReturn(
+                cartItem().with(product).quantity(2).build()
+        );
+
+        mockMvc.perform(put(uriForCartItemWithProductId("product1-id"))
+                .contentType(APPLICATION_JSON_UTF8)
+                .content("{\"productId\":\"product1-id\"," +
+                        "\"quantity\":-7}"))
+                .andExpect(status().is(400))
+                .andExpect(content().contentType(APPLICATION_JSON_UTF8))
+                .andExpect(jsonPath("$.message", is("Validation failed")))
+                .andExpect(jsonPath("$.errors", hasSize(2)))
+                .andExpect(jsonPath("$.errors[0].field", is("quantity")))
+                .andExpect(jsonPath("$.errors[0].message", is("Quantity should not be negative")))
+                .andExpect(jsonPath("$.errors[1].field", is("productId")))
+                .andExpect(jsonPath("$.errors[1].message", is("Product with id 'product1-id' does not exist in the product catalogue")))
+        ;
+
+        verifyZeroInteractions(writableShoppingCart);
+    }
+
+    @Test
+    public void shouldReturnValidationErrorWhenTryingToUpdateItemAndPathParameterDoesNotMatchProductIdInTheRequestBody() throws Exception{
+
+        EffectivePriceProduct product = productWithId("product1-id").name("product name").price(8.90).effectivePrice(3.80)
+                .build();
+        when(mockReadableShoppingCartProvider.getShoppingCartItem("product1-id")).thenReturn(
+                cartItem().with(product).quantity(2).build()
+        );
+        when(productCatalogue.getProduct("product1-id")).thenReturn(new Product("product1-id", "name", somePrice()));
+        when(productCatalogue.getProduct("product2-id")).thenReturn(new Product("product2-id", "name", somePrice()));
+
+        mockMvc.perform(put(uriForCartItemWithProductId("product1-id"))
+                .contentType(APPLICATION_JSON_UTF8)
+                .content("{\"productId\":\"product2-id\"," +
+                        "\"quantity\":7}"))
+                .andExpect(status().is(400))
+                .andExpect(content().contentType(APPLICATION_JSON_UTF8))
+                .andExpect(jsonPath("$.message", is("Validation failed")))
+                .andExpect(jsonPath("$.errors", hasSize(1)))
+                .andExpect(jsonPath("$.errors[0].field", is("productId")))
+                .andExpect(jsonPath("$.errors[0].message", is("ProductId specified in the url (product1-id) does not " +
+                                                                "match with productId in the body (product2-id). They must be the same.")))
+        ;
+
+        verifyZeroInteractions(writableShoppingCart);
     }
 
     @Test

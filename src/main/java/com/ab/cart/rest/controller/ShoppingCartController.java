@@ -15,6 +15,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.stereotype.Controller;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.Errors;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -27,6 +29,9 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 import javax.validation.Valid;
+
+import static com.google.common.base.Objects.equal;
+import static java.lang.String.format;
 
 @Controller
 public class ShoppingCartController {
@@ -65,7 +70,7 @@ public class ShoppingCartController {
     @ExceptionHandler(ProductNotInShoppingCartException.class)
     @ResponseStatus(value= HttpStatus.NOT_FOUND)
     @ResponseBody
-    public RestError handleNoProductInShoppingCartException(Exception exc) {
+    public RestError handleNoProductInShoppingCartException(ProductNotInShoppingCartException exc) {
         return new RestError(404, exc.getMessage());
     }
 
@@ -75,6 +80,14 @@ public class ShoppingCartController {
     public ValidationError resolveBindingException (MethodArgumentNotValidException methodArgumentNotValidException)
     {
         return new ValidationError(400, "Validation failed", methodArgumentNotValidException.getBindingResult());
+    }
+
+    @ExceptionHandler(ValidationException.class)
+    @ResponseBody
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ValidationError resolveBindingException (ValidationException validationException)
+    {
+        return new ValidationError(400, "Validation failed", validationException.getErrors());
     }
 
     @RequestMapping(value = UriFor.cartItems, method = RequestMethod.POST)
@@ -100,9 +113,15 @@ public class ShoppingCartController {
 
     @RequestMapping(value = UriFor.cartItem, method = RequestMethod.PUT)
     @ResponseBody
-    public ShoppingCartItemResource updateQuantity(@PathVariable String productId, @RequestBody CartItemParameter cartItem) {
-        //todo validate that parameters match
-        //todo handle product does not exist and negative quantity
+    public ShoppingCartItemResource updateQuantity(@PathVariable String productId, @RequestBody @Valid CartItemParameter cartItem, BindingResult validationErrors) {
+        if(!equal(productId, cartItem.getProductId())) {
+            validationErrors.rejectValue("productId", format("ProductId specified in the url (%s) " +
+                                                             "does not match with productId in the body (%s). " +
+                                                             "They must be the same.", productId, cartItem.getProductId()));
+        }
+        if(validationErrors.hasErrors()) {
+            throw new ValidationException(validationErrors);
+        }
         writableShoppingCart.updateQuantity(cartItem.getProductId(), cartItem.getQuantity());
         return getCartItemResourceFor(productId);
     }
@@ -112,4 +131,15 @@ public class ShoppingCartController {
         return new ShoppingCartItemResource(shoppingCartItem);
     }
 
+    static class ValidationException extends RuntimeException {
+        private Errors errors;
+
+        ValidationException(Errors errors) {
+            this.errors = errors;
+        }
+
+        Errors getErrors() {
+            return errors;
+        }
+    }
 }
