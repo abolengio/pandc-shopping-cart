@@ -17,6 +17,7 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
+import org.springframework.validation.MapBindingResult;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -29,6 +30,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 import javax.validation.Valid;
+import java.util.HashMap;
 
 import static com.google.common.base.Objects.equal;
 import static java.lang.String.format;
@@ -106,9 +108,17 @@ public class ShoppingCartController {
     @RequestMapping(value = UriFor.cartItem, method = RequestMethod.DELETE)
     @ResponseBody
     public DeletedItemResource removeItem(@PathVariable String productId) {
-        //todo handle product does not exist - HOW ???
+        Errors errors = noErrors();
+        cartItemValidator.validateProductId(productId, errors);
+        if(errors.hasErrors()) {
+            throw new ValidationException(errors);
+        }
         writableShoppingCart.remove(productId);
         return new DeletedItemResource();
+    }
+
+    private MapBindingResult noErrors() {
+        return new MapBindingResult(new HashMap<String, String>(), CartItemParameter.class.getName());
     }
 
     @RequestMapping(value = UriFor.cartItem, method = RequestMethod.PUT)

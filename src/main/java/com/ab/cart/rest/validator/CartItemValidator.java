@@ -28,8 +28,12 @@ public class CartItemValidator implements Validator {
         if (cartItemParameter.getQuantity() < 0) {
             errors.rejectValue("quantity", "Quantity should not be negative");
         }
-        if (productCatalogue.getProduct(cartItemParameter.getProductId()) == null){
-            errors.rejectValue("productId", format("Product with id '%s' does not exist in the product catalogue",cartItemParameter.getProductId()));
+        validateProductId(cartItemParameter.getProductId(), errors);
+    }
+
+    public void validateProductId(String productId, Errors errors) {
+        if (productCatalogue.getProduct(productId) == null){
+            errors.rejectValue("productId", format("Product with id '%s' does not exist in the product catalogue",productId));
         }
     }
 }

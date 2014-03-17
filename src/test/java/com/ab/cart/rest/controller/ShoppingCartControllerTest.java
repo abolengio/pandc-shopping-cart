@@ -271,12 +271,7 @@ public class ShoppingCartControllerTest {
     @Test
     public void shouldReturnValidationErrorWhenTryingToAddItemWithNegativeQuantity() throws Exception{
 
-        EffectivePriceProduct product = productWithId("product1-id").name("product name").price(8.90).effectivePrice(3.80)
-                .build();
         when(productCatalogue.getProduct("product1-id")).thenReturn(new Product("product1-id", "name", somePrice()));
-        when(mockReadableShoppingCartProvider.getShoppingCartItem("product1-id")).thenReturn(
-                cartItem().with(product).quantity(2).build()
-        );
 
         mockMvc.perform(post(UriFor.cartItems)
                                 .contentType(APPLICATION_JSON_UTF8)
@@ -300,12 +295,6 @@ public class ShoppingCartControllerTest {
     @Test
     public void shouldReturnValidationErrorWhenTryingToAddNotExistingProduct() throws Exception{
 
-        EffectivePriceProduct product = productWithId("product1-id").name("product name").price(8.90).effectivePrice(3.80)
-                .build();
-        when(mockReadableShoppingCartProvider.getShoppingCartItem("product1-id")).thenReturn(
-                cartItem().with(product).quantity(2).build()
-        );
-
         mockMvc.perform(post(UriFor.cartItems)
                                 .contentType(APPLICATION_JSON_UTF8)
                                 .content("{\"productId\":\"product1-id\"," +
@@ -323,12 +312,6 @@ public class ShoppingCartControllerTest {
 
     @Test
     public void shouldReturnValidationErrorWhenQuantityIsNotANumber() throws Exception{
-
-        EffectivePriceProduct product = productWithId("product1-id").name("product name").price(8.90).effectivePrice(3.80)
-                .build();
-        when(mockReadableShoppingCartProvider.getShoppingCartItem("product1-id")).thenReturn(
-                cartItem().with(product).quantity(2).build()
-        );
 
         mockMvc.perform(post(UriFor.cartItems)
                 .contentType(APPLICATION_JSON_UTF8)
@@ -414,12 +397,6 @@ public class ShoppingCartControllerTest {
     @Test
     public void shouldReturnValidationErrorWhenTryingToUpdateItemForNotExistingProductAndQuantityIsNegative() throws Exception{
 
-        EffectivePriceProduct product = productWithId("product1-id").name("product name").price(8.90).effectivePrice(3.80)
-                .build();
-        when(mockReadableShoppingCartProvider.getShoppingCartItem("product1-id")).thenReturn(
-                cartItem().with(product).quantity(2).build()
-        );
-
         mockMvc.perform(put(uriForCartItemWithProductId("product1-id"))
                 .contentType(APPLICATION_JSON_UTF8)
                 .content("{\"productId\":\"product1-id\"," +
@@ -440,11 +417,6 @@ public class ShoppingCartControllerTest {
     @Test
     public void shouldReturnValidationErrorWhenTryingToUpdateItemAndPathParameterDoesNotMatchProductIdInTheRequestBody() throws Exception{
 
-        EffectivePriceProduct product = productWithId("product1-id").name("product name").price(8.90).effectivePrice(3.80)
-                .build();
-        when(mockReadableShoppingCartProvider.getShoppingCartItem("product1-id")).thenReturn(
-                cartItem().with(product).quantity(2).build()
-        );
         when(productCatalogue.getProduct("product1-id")).thenReturn(new Product("product1-id", "name", somePrice()));
         when(productCatalogue.getProduct("product2-id")).thenReturn(new Product("product2-id", "name", somePrice()));
 
@@ -467,6 +439,8 @@ public class ShoppingCartControllerTest {
     @Test
     public void shouldRemoveItem() throws Exception{
 
+        when(productCatalogue.getProduct("product1-id")).thenReturn(new Product("product1-id", "name", somePrice()));
+
         mockMvc.perform(delete(uriForCartItemWithProductId("product1-id")))
                 .andExpect(status().is(200))
                 .andExpect(content().contentType(APPLICATION_JSON_UTF8))
@@ -479,7 +453,21 @@ public class ShoppingCartControllerTest {
         verify(writableShoppingCart).remove("product1-id");
     }
 
-    //todo test validation
+    @Test
+    public void shouldReturnValidationErrorWhenTryingToRemoveItemForProductWhichDoesNotExist() throws Exception{
+
+        mockMvc.perform(delete(uriForCartItemWithProductId("product1-id")))
+                .andExpect(status().is(400))
+                .andExpect(content().contentType(APPLICATION_JSON_UTF8))
+                .andExpect(jsonPath("$.message", is("Validation failed")))
+                .andExpect(jsonPath("$.errors", hasSize(1)))
+                .andExpect(jsonPath("$.errors[0].field", is("productId")))
+                .andExpect(jsonPath("$.errors[0].message", is("Product with id 'product1-id' does not exist in the product catalogue")))
+        ;
+
+        verifyZeroInteractions(writableShoppingCart);
+    }
+
     private String uriForCartItemWithProductId(String productId) {
         return replace(UriFor.cartItem, "{productId}" , productId);
     }
