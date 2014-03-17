@@ -3,9 +3,13 @@ package com.ab.cart.rest.controller;
 import com.ab.cart.config.spring.TestApplicationConfig;
 import com.ab.cart.config.spring.WebMvcConfig;
 import com.ab.cart.domain.EffectivePriceProduct;
+import com.ab.cart.domain.Product;
 import com.ab.cart.domain.ProductNotInShoppingCartException;
 import com.ab.cart.domain.ReadableShoppingCartProvider;
 import com.ab.cart.domain.WritableShoppingCart;
+import com.ab.cart.domain.productcatalogue.ProductCatalogue;
+import org.joda.money.CurrencyUnit;
+import org.joda.money.Money;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -54,12 +58,17 @@ public class ShoppingCartControllerTest {
     private ReadableShoppingCartProvider mockReadableShoppingCartProvider;
 
     @Autowired
+    private ProductCatalogue productCatalogue;
+
+    @Autowired
     private WritableShoppingCart writableShoppingCart;
 
     @Before
     public void setup() {
         mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
         reset(mockReadableShoppingCartProvider);
+        reset(productCatalogue);
+        reset(writableShoppingCart);
     }
 
     @Test
@@ -235,6 +244,7 @@ public class ShoppingCartControllerTest {
         when(mockReadableShoppingCartProvider.getShoppingCartItem("product1-id")).thenReturn(
                 cartItem().with(product).quantity(2).build()
         );
+        when(productCatalogue.getProduct("product1-id")).thenReturn(new Product("product1-id", "name", somePrice()));
 
         mockMvc.perform(post(UriFor.cartItems)
                                 .contentType(APPLICATION_JSON_UTF8)
@@ -263,6 +273,7 @@ public class ShoppingCartControllerTest {
 
         EffectivePriceProduct product = productWithId("product1-id").name("product name").price(8.90).effectivePrice(3.80)
                 .build();
+        when(productCatalogue.getProduct("product1-id")).thenReturn(new Product("product1-id", "name", somePrice()));
         when(mockReadableShoppingCartProvider.getShoppingCartItem("product1-id")).thenReturn(
                 cartItem().with(product).quantity(2).build()
         );
@@ -282,6 +293,34 @@ public class ShoppingCartControllerTest {
         verifyZeroInteractions(writableShoppingCart);
     }
 
+    private Money somePrice() {
+        return Money.of(CurrencyUnit.EUR, 37.28);
+    }
+
+    @Test
+    public void shouldReturnValidationErrorWhenTryingToAddNotExistingProduct() throws Exception{
+
+        EffectivePriceProduct product = productWithId("product1-id").name("product name").price(8.90).effectivePrice(3.80)
+                .build();
+        when(mockReadableShoppingCartProvider.getShoppingCartItem("product1-id")).thenReturn(
+                cartItem().with(product).quantity(2).build()
+        );
+
+        mockMvc.perform(post(UriFor.cartItems)
+                                .contentType(APPLICATION_JSON_UTF8)
+                                .content("{\"productId\":\"product1-id\"," +
+                                        "\"quantity\":1}"))
+                .andExpect(status().is(400))
+                .andExpect(content().contentType(APPLICATION_JSON_UTF8))
+                .andExpect(jsonPath("$.message", is("Validation failed")))
+                .andExpect(jsonPath("$.errors", hasSize(1)))
+                .andExpect(jsonPath("$.errors[0].field", is("productId")))
+                .andExpect(jsonPath("$.errors[0].message", is("Product with id 'product1-id' does not exist in the product catalogue")))
+                ;
+
+        verifyZeroInteractions(writableShoppingCart);
+    }
+
     @Test
     public void shouldReturnValidationErrorWhenQuantityIsNotANumber() throws Exception{
 
@@ -292,9 +331,9 @@ public class ShoppingCartControllerTest {
         );
 
         mockMvc.perform(post(UriFor.cartItems)
-                                .contentType(APPLICATION_JSON_UTF8)
-                                .content("{\"productId\":\"2\"," +
-                                        "\"quantity\":\"blah\"}"))
+                .contentType(APPLICATION_JSON_UTF8)
+                .content("{\"productId\":\"2\"," +
+                        "\"quantity\":\"blah\"}"))
                 .andExpect(status().is(400))
                 .andExpect(content().contentType(APPLICATION_JSON_UTF8))
                 ;

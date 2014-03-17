@@ -15,6 +15,7 @@ import com.ab.cart.repository.impl.eventsourced.AggregatingShoppingCartFactory;
 import com.ab.cart.repository.impl.eventsourced.EventSourcingFileShoppingCartReaderWriter;
 import com.ab.cart.repository.impl.eventsourced.EventSourcingShoppingCartItemsRepository;
 import com.ab.cart.repository.impl.eventsourced.ShoppingCartCommandSerializerDeserializer;
+import com.ab.cart.rest.validator.CartItemValidator;
 import com.ab.cart.utils.FileLineWriter;
 import com.ab.cart.utils.FileReaderFactory;
 import com.ab.cart.utils.FileWriterFactory;
@@ -102,6 +103,12 @@ public class ApplicationConfig {
     @Bean
     public ProductCatalogue productCatalogue() throws IOException {
         return new SimpleProductRepository(csvFileProductProvider(environment));
+    }
+
+    @Bean
+    @Autowired
+    CartItemValidator cartItemValidator(ProductCatalogue productCatalogue) {
+        return new CartItemValidator(productCatalogue);
     }
 
 }

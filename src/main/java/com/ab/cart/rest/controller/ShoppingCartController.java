@@ -33,16 +33,18 @@ public class ShoppingCartController {
 
     private ReadableShoppingCartProvider readableShoppingCartProvider;
     private WritableShoppingCart writableShoppingCart;
+    private CartItemValidator cartItemValidator;
 
     @Autowired
-    public ShoppingCartController( ReadableShoppingCartProvider readableShoppingCartProvider, WritableShoppingCart writableShoppingCart) {
+    public ShoppingCartController( ReadableShoppingCartProvider readableShoppingCartProvider, WritableShoppingCart writableShoppingCart, CartItemValidator cartItemValidator) {
         this.readableShoppingCartProvider = readableShoppingCartProvider;
         this.writableShoppingCart = writableShoppingCart;
+        this.cartItemValidator = cartItemValidator;
     }
 
     @InitBinder
     protected void initBinder(WebDataBinder binder) {
-        binder.setValidator(new CartItemValidator());  //todo inject
+        binder.setValidator(cartItemValidator);
     }
 
     @RequestMapping(value = UriFor.cart, method = RequestMethod.GET)
@@ -78,7 +80,6 @@ public class ShoppingCartController {
     @RequestMapping(value = UriFor.cartItems, method = RequestMethod.POST)
     @ResponseBody
     public ShoppingCartItemResource addItem(@RequestBody @Valid CartItemParameter cartItem) {
-        //todo handle product does not exist
         writableShoppingCart.add(cartItem.getProductId(), cartItem.getQuantity());
         return getCartItemResourceFor(cartItem.getProductId());
     }

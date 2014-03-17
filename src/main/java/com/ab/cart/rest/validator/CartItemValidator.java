@@ -1,10 +1,21 @@
 package com.ab.cart.rest.validator;
 
+import com.ab.cart.domain.productcatalogue.ProductCatalogue;
 import com.ab.cart.rest.controller.CartItemParameter;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 
+import static java.lang.String.format;
+
 public class CartItemValidator implements Validator {
+
+    private ProductCatalogue productCatalogue;
+
+    @Autowired
+    public CartItemValidator(ProductCatalogue productCatalogue) {
+        this.productCatalogue = productCatalogue;
+    }
 
     @Override
     public boolean supports(Class<?> clazz) {
@@ -16,6 +27,9 @@ public class CartItemValidator implements Validator {
         CartItemParameter cartItemParameter = (CartItemParameter)o;
         if (cartItemParameter.getQuantity() < 0) {
             errors.rejectValue("quantity", "Quantity should not be negative");
+        }
+        if (productCatalogue.getProduct(cartItemParameter.getProductId()) == null){
+            errors.rejectValue("productId", format("Product with id '%s' does not exist in the product catalogue",cartItemParameter.getProductId()));
         }
     }
 }
