@@ -5,5 +5,7 @@ target
 .idea
 *.iml
 shopping.cart.csv
+src/test/resources/integration.test.products.csv
+src/test/resources/test.shopping.cart.csv
 
 /build
