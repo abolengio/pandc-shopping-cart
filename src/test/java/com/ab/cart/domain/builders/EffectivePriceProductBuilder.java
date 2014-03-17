@@ -11,7 +11,6 @@ import org.joda.time.format.DateTimeFormatter;
 public class EffectivePriceProductBuilder {
 
     private static DateTimeFormatter formatter = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss").withZone(Preferences.SYSTEM_TIME_ZONE);
-    //todo move to central place to sync timezones
 
     String productId = null;
     String name = "Default name";

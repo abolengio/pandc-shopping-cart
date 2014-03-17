@@ -17,6 +17,7 @@ public class EffectivePriceProductProvider {
 
     public EffectivePriceProduct getProduct(String productId) {
         Product product = productCatalogue.getProduct(productId);
+        if(product == null) throw new ProductDoesNotExistException(productId);
         Money effectivePrice = pricingStrategy.getEffectivePrice(product);
 
         return new EffectivePriceProduct(

@@ -49,7 +49,7 @@ public class ReadableShoppingCartBuilder {
      * @param expandedCartItems
      * @return
      */
-    public ReadableShoppingCartBuilder withItems(Iterable<ExpandedCartItem> expandedCartItems) {    //todo move into shopping cart
+    public ReadableShoppingCartBuilder withItems(Iterable<ExpandedCartItem> expandedCartItems) {    //todo move into a shopping cart class, the builder like this is ugly
         items = new ArrayList<>();
         Money cartSubTotal = ZERO;
         for(ExpandedCartItem item : expandedCartItems) {

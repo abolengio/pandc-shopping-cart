@@ -26,7 +26,6 @@ public class ReadableShoppingCartProvider {
         this.cartItemToExpandedCartItemTransformer = cartItemToExpandedCartItemTransformer;
     }
 
-    //todo handle non existing products
     public ReadableShoppingCart getReadableShoppingCart() {
         List<CartItem> shoppingCartItems = shoppingCartItemsRepository.getShoppingCartItems();
         Iterable<ExpandedCartItem> expandedCartItems = enhanceCartItemsWithProductAndPriceInfo(shoppingCartItems);

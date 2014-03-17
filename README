@@ -96,10 +96,6 @@ remove completely:
             valid till: rebate-timeframe-end
 
 
-TODO:
-- handle when quantity is updated to 0
-- handle adding non-existing product
-
 
 
 WHAT I WOULD DO DIFFERENTLY:

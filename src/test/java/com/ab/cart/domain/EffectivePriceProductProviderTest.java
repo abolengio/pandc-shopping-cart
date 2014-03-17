@@ -55,4 +55,13 @@ public class EffectivePriceProductProviderTest {
         //then
         assertThat(effectivePriceProduct.getRebateTimeFrame(), is(equalTo(rebateTimeFrame)));
     }
+
+    @Test(expected = ProductDoesNotExistException.class)
+    public void shouldThrowExceptionWhenProductDoesNotExist() {
+        //given
+        when(productCatalogue.getProduct("some-product-id")).thenReturn(null);
+        //when
+        EffectivePriceProductProvider pricingProvider = new EffectivePriceProductProvider(productCatalogue, pricingStrategy);
+        pricingProvider.getProduct("some-product-id");
+    }
 }

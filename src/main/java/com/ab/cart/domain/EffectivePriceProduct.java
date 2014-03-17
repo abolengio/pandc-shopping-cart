@@ -7,7 +7,7 @@ public class EffectivePriceProduct extends Product {
 
     private final Money effectivePrice;
 
-    public EffectivePriceProduct(String productId, String name, Money originalPrice, ReadableInterval rebateTimeFrame, Money effectivePrice) {   //todo use builder ?
+    public EffectivePriceProduct(String productId, String name, Money originalPrice, ReadableInterval rebateTimeFrame, Money effectivePrice) {
         super( productId,  name,  originalPrice, rebateTimeFrame);
         this.effectivePrice = effectivePrice;
     }
