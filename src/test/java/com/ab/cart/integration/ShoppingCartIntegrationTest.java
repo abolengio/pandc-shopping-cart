@@ -122,17 +122,26 @@ public class ShoppingCartIntegrationTest {
     public void shouldAddItem() throws Exception{
         givenProductFileWithContent("1001,test dress with pink flowers,29.99,\n" +
                 "1002,Test Green Shirt,9.90,\n");
-        givenShoppingCartFileWithContent("ADD,1001,1\n");
+        givenShoppingCartFileWithContent("ADD,1001,2\nADD,1002,1\n");
 
         mockMvc.perform(post(UriFor.cartItems)
                 .contentType(APPLICATION_JSON_UTF8)
                 .content("{\"productId\":\"1002\"," +
                         "\"quantity\":2}"))
-                .andExpect(status().is(303))
+                .andExpect(status().is(200))
+                .andExpect(content().contentType(APPLICATION_JSON_UTF8))
+                .andExpect(jsonPath("$.productId", is("1002")))
+                .andExpect(jsonPath("$.quantity", is(3)))
+                .andExpect(jsonPath("$.subTotal.amount", is(29.70)))
+                .andExpect(jsonPath("$.product.effectivePrice.amount", is(9.90)))
+                .andExpect(jsonPath("$.product.effectivePrice.currency", is("EUR")))
+                .andExpect(jsonPath("$.product.price.amount", is(9.90)))
+                .andExpect(jsonPath("$.product.price.currency", is("EUR")))
                 ;
 
-        assertThat(shoppingCartFileContent(), is("ADD,1001,1\n" +
-                "ADD,1002,2\n"));
+        assertThat(shoppingCartFileContent(), is("ADD,1001,2\n" +
+                                                "ADD,1002,1\n" +
+                                                "ADD,1002,2\n"));
     }
 
     @Test

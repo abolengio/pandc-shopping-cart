@@ -18,8 +18,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.servlet.View;
-import org.springframework.web.servlet.view.RedirectView;
 
 @Controller
 public class ShoppingCartController {
@@ -42,8 +40,10 @@ public class ShoppingCartController {
     }
 
     @ExceptionHandler(Exception.class)
-    public void handleException(Exception ex) {
-        ex.printStackTrace();   //todo
+    @ResponseStatus(value= HttpStatus.INTERNAL_SERVER_ERROR)
+    @ResponseBody
+    public RestError handleException(Exception exc) {
+        return new RestError(500, exc.getMessage());
     }
 
     @ExceptionHandler(ProductNotInShoppingCartException.class)
@@ -71,17 +71,17 @@ public class ShoppingCartController {
      */
 
     @RequestMapping(value = UriFor.cartItems, method = RequestMethod.POST)
-    public View addItem(@RequestBody CartItemParameter cartItem) {
+    @ResponseBody
+    public ShoppingCartItemResource addItem(@RequestBody CartItemParameter cartItem) {
+        //todo handle product does not exist and negative quantity
         writableShoppingCart.add(cartItem.getProductId(), cartItem.getQuantity());
-        return new RedirectView(UriFor.cart, true, false);
+        return getCartItemResourceFor(cartItem.getProductId());
     }
-
 
     @RequestMapping(value = UriFor.cartItem, method = RequestMethod.GET)
     @ResponseBody
     public ShoppingCartItemResource getCartItem(@PathVariable String productId) {
-        ExpandedCartItem shoppingCartItem = readableShoppingCartProvider.getShoppingCartItem(productId);
-        return new ShoppingCartItemResource(shoppingCartItem);
+        return getCartItemResourceFor(productId);
     }
 
     @RequestMapping(value = UriFor.cartItem, method = RequestMethod.DELETE)
@@ -98,8 +98,14 @@ public class ShoppingCartController {
     @ResponseBody
     public ShoppingCartItemResource updateQuantity(@PathVariable String productId, @RequestBody CartItemParameter cartItem) {
         //todo validate that parameters match
+        //todo handle product does not exist and negative quantity
         writableShoppingCart.updateQuantity(cartItem.getProductId(), cartItem.getQuantity());
+        return getCartItemResourceFor(productId);
+    }
+
+    private ShoppingCartItemResource getCartItemResourceFor(String productId) {
         ExpandedCartItem shoppingCartItem = readableShoppingCartProvider.getShoppingCartItem(productId);
-        return new ShoppingCartItemResource(shoppingCartItem);    }
+        return new ShoppingCartItemResource(shoppingCartItem);
+    }
 
 }
